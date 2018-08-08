@@ -55,7 +55,6 @@ master_doc = 'index'
 
 # General information about the project.
 repository_name = 'openstack/stx-metal'
-project = u'stx-metal'
 bug_project = 'stx-metal'
 bug_tag = 'stx.bug'
 

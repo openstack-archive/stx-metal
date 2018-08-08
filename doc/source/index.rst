@@ -12,6 +12,4 @@ StarlingX Bare Metal and Node Management, Hardware Maintenance.
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
