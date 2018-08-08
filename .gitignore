@@ -21,3 +21,6 @@ develop-eggs
 dist
 eggs
 sdist
+
+# Sphinx documentation
+docs/build/
