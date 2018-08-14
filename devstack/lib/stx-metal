@@ -1,0 +1,106 @@
+#!/bin/bash
+#
+# lib/stx-metal
+# Functions to control the configuration and operation of stx-metal
+
+# Dependencies:
+#
+
+# ``stack.sh`` calls the entry points in this order:
+#
+# - preinstall_metal
+# - install_metal
+# - - install_mtce_common
+# - - install_mtce_compute
+# - - install_mtce_control
+# - - install_mtce_storage
+# - - install_mtce
+# - start_metal
+# - - start_mtce
+# - - start_hostw
+# - - start_pmon
+# - - start_rmon
+
+_XTRACE_STX_METAL=$(set +o | grep xtrace)
+set -o xtrace
+
+# Defaults
+# --------
+
+GITDIR["$STX_METAL_NAME"]=$DEST/stx-metal
+STX_METAL_BIN=/usr/bin
+STX_METAL_SBIN=/usr/sbin
+STX_METAL_LOCAL_BIN=/usr/local/bin
+
+# Functions
+# ---------
+
+function preinstall_metal {
+    if is_ubuntu; then
+        sudo apt-get install -y cppcheck libevent-2.0 libevent-dev libjson0 libjson0-dev
+    else
+        echo "stx-metal isn't available for $DISTRO"
+    fi
+}
+
+function install_metal {
+    install_mtce_common
+    install_mtce_compute
+    install_mtce_control
+    install_mtce_storage
+    install_mtce
+}
+
+function start_metal {
+    if is_service_enabled mtce; then
+        echo "start mtce services"
+        start_mtce
+    fi
+    if is_service_enabled hostw; then
+        echo "start hostw service"
+        start_hostw
+    fi
+    if is_service_enabled pmon; then
+        echo "start pmon service"
+        start_pmon
+    fi
+    if is_service_enabled rmon; then
+        echo "start rmon service"
+        start_rmon
+    fi
+}
+
+function start_mtce {
+    echo "trigger start mtce service"
+    run_process fsmon "$STX_METAL_LOCAL_BIN/fsmond -l"
+    run_process mtcClient "$STX_METAL_LOCAL_BIN/mtcClient -l"
+    run_process hbsClient "$STX_METAL_LOCAL_BIN/hbsClient -l"
+    run_process mtclog "$STX_METAL_LOCAL_BIN/mtclogd -l"
+    run_process iscsid "$STX_METAL_SBIN/iscsid"
+    run_process rsyncd "$STX_METAL_BIN/rsync --daemon --no-detach"
+    run_process iscsid "$STX_METAL_SBIN/iscsid"
+    run_process goenabled "/etc/init.d/goenabled start"
+    run_process mtcalarm "$STX_METAL_LOCAL_BIN/mtcalarmd -l"
+}
+
+function start_hostw {
+    echo "trigger start hostw service"
+    run_process hostw "$STX_METAL_LOCAL_BIN/hostw"
+}
+
+function start_pmon {
+    echo "trigger start pmon service"
+    run_process pmon "$STX_METAL_LOCAL_BIN/pmond"
+}
+
+function start_rmon {
+    echo "trigger start rmon service"
+    run_process rmon "$STX_METAL_LOCAL_BIN/rmond"
+}
+
+function cleanup_metal {
+
+    echo "cleanup_metal"
+}
+
+$_XTRACE_STX_METAL
