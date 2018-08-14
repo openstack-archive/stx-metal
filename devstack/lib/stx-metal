@@ -1,0 +1,568 @@
+#!/bin/bash
+#
+# lib/stx-metal
+# Functions to control the configuration and operation of stx-metal
+
+# Dependencies:
+#
+
+# ``stack.sh`` calls the entry points in this order:
+#
+# - install_maintenance
+# - - install_mtce_common
+# - - install_mtce
+# - install_mtce_compute
+# - install_mtce_control
+# - install_mtce_storage
+#
+# - configure_maintenance
+#
+# - start_maintenance
+# - - start_mtcClient
+# - - start_hbsClient
+# - - start_pmon
+# - - start_rmon
+# - start_mtce_compute
+# - start_mtce_control
+# - - start_mtcAgent
+# - - start_hbsAgent
+# - - start_hwmon
+# - start_mtce_storage
+#
+# - stop_maintenance
+# - - stop_mtcClient
+# - - stop_hbsClient
+# - - stop_pmon
+# - - stop_rmon
+# - stop_mtce_compute
+# - stop_mtce_control
+# - - stop_mtcAgent
+# - - stop_hbsAgent
+# - - stop_hwmon
+# - stop_mtce_storage
+#
+# - cleanup_metal
+
+_XTRACE_STX_METAL=$(set +o | grep xtrace)
+set -o xtrace
+
+# Defaults
+# --------
+
+GITDIR["$STX_METAL_NAME"]=$DEST/stx-metal
+STX_METAL_BIN=/usr/bin
+STX_METAL_SBIN=/usr/sbin
+STX_METAL_LOCAL_BIN=/usr/local/bin
+PREFIX=/usr
+SYSCONFDIR=/etc
+BINDIR=bin
+SBINDIR=sbin
+LIBDIR=lib
+LIB64DIR=lib64
+INCDIR=include
+
+# Functions
+# ---------
+
+function install_mtce_common {
+    local x version
+
+    # get mtce-common version
+    read x version <<< $(grep '^Version:' ${GITDIR[$STX_METAL_NAME]}/mtce-common/PKG-INFO)
+    local major=${version%%.*}
+    local minor=${version##*.}
+
+    local lib64_dir=${PREFIX}/${LIB64DIR}
+    local inc_dir=${PREFIX}/${INCDIR}
+    local inc_dir_common=${PREFIX}/${INCDIR}/mtce-common
+    local inc_dir_daemon=${PREFIX}/${INCDIR}/mtce-daemon
+
+    # build
+    pushd ${GITDIR[$STX_METAL_NAME]}/mtce-common/src
+    make MAJOR=${major} MINOR=${minor} CCFLAGS=' -g -O2 -Wall -Wextra -std=c++11 -DBUILDINFO="\"$$(date)\""' build
+    sudo install -m 755 -d ${lib64_dir}
+    sudo install -m 644 -p -D daemon/libdaemon.a ${lib64_dir}
+    sudo install -m 644 -p -D common/libcommon.a ${lib64_dir}
+    sudo install -m 644 -p -D common/libthreadUtil.a ${lib64_dir}
+    sudo install -m 644 -p -D common/libipmiUtil.a ${lib64_dir}
+    sudo install -m 644 -p -D common/libpingUtil.a ${lib64_dir}
+    sudo install -m 644 -p -D common/libnodeBase.a ${lib64_dir}
+    sudo install -m 644 -p -D common/libregexUtil.a ${lib64_dir}
+    sudo install -m 644 -p -D common/libhostUtil.a ${lib64_dir}
+
+    # mtce-common headers required to bring in nodeBase.h
+    sudo install -m 755 -d ${inc_dir}
+    sudo install -m 755 -d ${inc_dir_common}
+    sudo install -m 644 -p -D common/fitCodes.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/logMacros.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/returnCodes.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/nodeTimers.h ${inc_dir_common}
+
+    # mtce-common headers required to build mtce-guest
+    sudo install -m 644 -p -D common/hostClass.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/httpUtil.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/jsonUtil.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/msgClass.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/nodeBase.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/nodeEvent.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/nodeMacro.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/nodeUtil.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/timeUtil.h ${inc_dir_common}
+
+    # mtce-daemon headers required to build mtce-guest
+    sudo install -m 755 -d ${inc_dir_daemon}
+    sudo install -m 644 -p -D daemon/daemon_ini.h ${inc_dir_daemon}
+    sudo install -m 644 -p -D daemon/daemon_common.h ${inc_dir_daemon}
+    sudo install -m 644 -p -D daemon/daemon_option.h ${inc_dir_daemon}
+
+    # remaining mtce-common headers required to build mtce
+    sudo install -m 644 -p -D common/alarmUtil.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/hostUtil.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/ipmiUtil.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/nlEvent.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/pingUtil.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/regexUtil.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/threadUtil.h ${inc_dir_common}
+    sudo install -m 644 -p -D common/tokenUtil.h ${inc_dir_common}
+    popd
+}
+
+function install_mtce_compute {
+    local sysconf_dir=${SYSCONFDIR}
+    local unit_dir=${PREFIX}/${LIBDIR}/systemd/system
+    local local_etc_pmond=${SYSCONFDIR}/pmon.d
+    local local_etc_goenabledd=${SYSCONFDIR}/goenabled.d
+    local local_etc_nova=${SYSCONFDIR}/nova
+
+    # install
+    pushd ${GITDIR[$STX_METAL_NAME]}/mtce-compute/src
+    # Compute-Only Init Scripts
+    sudo install -m 755 -p -D scripts/goenabled ${sysconf_dir}/init.d/goenabledCompute
+    sudo install -m 755 -p -D scripts/e_nova-init ${sysconf_dir}/init.d/e_nova-init
+    sudo install -m 755 -p -D scripts/nova-cleanup ${sysconf_dir}/init.d/nova-cleanup
+    sudo install -m 755 -p -D scripts/nova-startup ${sysconf_dir}/init.d/nova-startup
+
+    # Compute-Only Process Monitor Config files
+    sudo install -m 755 -d ${local_etc_pmond}
+    sudo install -m 755 -d ${local_etc_nova}
+    sudo install -m 644 -p -D scripts/nova-cleanup.conf ${local_etc_nova}/nova-cleanup.conf
+    sudo install -m 644 -p -D scripts/nova-compute.conf ${local_etc_nova}/nova-compute.conf
+    sudo install -m 644 -p -D scripts/libvirtd.conf ${local_etc_pmond}/libvirtd.conf
+
+    # Compute-Only Go Enabled Test
+    sudo install -m 755 -d ${local_etc_goenabledd}
+    sudo install -m 755 -p -D scripts/nova-goenabled.sh ${local_etc_goenabledd}/nova-goenabled.sh
+    sudo install -m 755 -p -D scripts/virt-support-goenabled.sh ${local_etc_goenabledd}/virt-support-goenabled.sh
+
+    # Install to systemd
+    sudo install -m 644 -p -D scripts/goenabled-compute.service ${unit_dir}/goenabled-compute.service
+    sudo install -m 644 -p -D scripts/e_nova-init.service ${unitdir}/e_nova-init.service
+    popd
+}
+
+function install_mtce_control {
+    local sysconf_dir=${SYSCONFDIR}
+    local local_etc_pmond=${SYSCONFDIR}/pmon.d
+    local local_etc_goenabledd=${SYSCONFDIR}/goenabled.d
+
+    # install
+    pushd ${GITDIR[$STX_METAL_NAME]}/mtce-control/src
+    # Controller-Only Init Scripts
+    sudo install -m 755 -p -D scripts/goenabled ${sysconf_dir}/init.d/goenabledControl
+    # Controller-Only Process Monitor Config files
+    sudo install -m 755 -d ${local_etc_pmond}
+    # Controller-Only Go Enabled Test
+    sudo install -m 755 -d ${local_etc_goenabledd}
+    popd
+}
+
+function install_mtce_storage {
+    local sysconf_dir=${SYSCONFDIR}
+    local unit_dir=${PREFIX}/${LIBDIR}/systemd/system
+    local local_etc_pmond=${SYSCONFDIR}/pmon.d
+    local local_etc_goenabledd=${SYSCONFDIR}/goenabled.d
+    local local_etc_servicesd=${SYSCONFDIR}/services.d
+
+    # install
+    pushd ${GITDIR[$STX_METAL_NAME]}/mtce-storage/src
+    # Storage-Only Init Scripts
+    sudo install -m 755 -p -D scripts/goenabled ${sysconf_dir}/init.d/goenabledStorage
+    # Storage-Only Process Monitor Config files
+    sudo install -m 755 -d ${local_etc_pmond}
+    # Storage-Only Go Enabled Tests
+    sudo install -m 755 -d ${local_etc_goenabledd}
+    # Storage-Only Services
+    sudo install -m 755 -d ${local_etc_servicesd}/storage
+    # Install systemd dir
+    sudo install -m 644 -p -D scripts/goenabled-storage.service ${unit_dir}/goenabled-storage.service
+    popd
+}
+
+function install_mtce {
+    local x version
+
+    # get mtce version
+    read x version <<< $(grep '^Version:' ${GITDIR[$STX_METAL_NAME]}/mtce/PKG-INFO)
+    local major=${version%%.*}
+    local minor=${version##*.}
+
+    local bin_dir=${PREFIX}/local/${BINDIR}
+    local sbin_dir=${PREFIX}/local/${SBINDIR}
+    local lib_dir=${PREFIX}/${LIBDIR}
+    local lib64_dir=${PREFIX}/${LIB64DIR}
+    local inc_dir=${PREFIX}/${INCDIR}
+    local sysconf_dir=${SYSCONFDIR}
+    local unit_dir=${PREFIX}/${LIBDIR}/systemd/system
+
+    local local_etc_pmond=${sysconf_dir}/pmon.d
+    local local_etc_rmond=${sysconf_dir}/rmon.d
+    local local_etc_goenabledd=${sysconf_dir}/goenabled.d
+    local local_etc_servicesd=${sysconf_dir}/services.d
+    local local_etc_logrotated=${sysconf_dir}/logrotate.d
+
+    # build
+    pushd ${GITDIR[$STX_METAL_NAME]}/mtce/src
+    make MAJOR=${major} MINOR=${minor} CCFLAGS=' -g -O2 -Wall -Wextra -std=c++11 -DBUILDINFO="\"$$(date)\""' build
+
+    # install
+    # Resource Agent Stuff
+    sudo install -m 755 -d ${lib_dir}/ocf
+    sudo install -m 755 -d ${lib_dir}/ocf/resource.d
+    sudo install -m 755 -d ${lib_dir}/ocf/resource.d/platform
+    sudo install -m 755 -p -D scripts/mtcAgent ${lib_dir}/ocf/resource.d/platform/mtcAgent
+    sudo install -m 755 -p -D scripts/hbsAgent ${lib_dir}/ocf/resource.d/platform/hbsAgent
+    sudo install -m 755 -p -D hwmon/scripts/ocf/hwmon ${lib_dir}/ocf/resource.d/platform/hwmon
+
+    # config files
+    sudo install -m 755 -d ${sysconf_dir}/mtc
+    sudo install -m 644 -p -D scripts/mtc.ini ${sysconf_dir}/mtc.ini
+    sudo install -m 644 -p -D scripts/mtc.conf ${sysconf_dir}/mtc.conf
+    sudo install -m 644 -p -D fsmon/scripts/fsmond.conf ${sysconf_dir}/mtc/fsmond.conf
+    sudo install -m 644 -p -D hwmon/scripts/hwmond.conf ${sysconf_dir}/mtc/hwmond.conf
+    sudo install -m 644 -p -D pmon/scripts/pmond.conf ${sysconf_dir}/mtc/pmond.conf
+    sudo install -m 644 -p -D rmon/scripts/rmond.conf ${sysconf_dir}/mtc/rmond.conf
+    sudo install -m 644 -p -D hostw/scripts/hostwd.conf ${sysconf_dir}/mtc/hostwd.conf
+
+    sudo install -m 755 -d ${sysconf_dir}/bmc/server_profiles.d
+    sudo install -m 644 -p -D scripts/sensor_hp360_v1_ilo_v4.profile ${sysconf_dir}/bmc/server_profiles.d/sensor_hp360_v1_ilo_v4.profile
+    sudo install -m 644 -p -D scripts/sensor_hp380_v1_ilo_v4.profile ${sysconf_dir}/bmc/server_profiles.d/sensor_hp380_v1_ilo_v4.profile
+    sudo install -m 644 -p -D scripts/sensor_quanta_v1_ilo_v4.profile ${sysconf_dir}/bmc/server_profiles.d/sensor_quanta_v1_ilo_v4.profile
+
+    # binaries
+    sudo install -m 755 -p -D maintenance/mtcAgent ${bin_dir}/mtcAgent
+    sudo install -m 755 -p -D maintenance/mtcClient ${bin_dir}/mtcClient
+    sudo install -m 755 -p -D heartbeat/hbsAgent ${bin_dir}/hbsAgent
+    sudo install -m 755 -p -D heartbeat/hbsClient ${bin_dir}/hbsClient
+    sudo install -m 755 -p -D pmon/pmond ${bin_dir}/pmond
+    sudo install -m 755 -p -D hostw/hostwd ${bin_dir}/hostwd
+    sudo install -m 755 -p -D rmon/rmond ${bin_dir}/rmond
+    sudo install -m 755 -p -D fsmon/fsmond ${bin_dir}/fsmond
+    sudo install -m 755 -p -D hwmon/hwmond ${bin_dir}/hwmond
+    sudo install -m 755 -p -D mtclog/mtclogd ${bin_dir}/mtclogd
+    sudo install -m 755 -p -D alarm/mtcalarmd ${bin_dir}/mtcalarmd
+    sudo install -m 755 -p -D rmon/rmon_resource_notify/rmon_resource_notify ${bin_dir}/rmon_resource_notify
+    sudo install -m 755 -p -D scripts/wipedisk ${bin_dir}/wipedisk
+    sudo install -m 755 -p -D fsync/fsync ${PREFIX}/${SBINDIR}/fsync
+    sudo install -m 700 -p -D pmon/scripts/pmon-restart ${sbin_dir}/pmon-restart
+    sudo install -m 700 -p -D pmon/scripts/pmon-start ${sbin_dir}/pmon-start
+    sudo install -m 700 -p -D pmon/scripts/pmon-stop ${sbin_dir}/pmon-stop
+
+    # init script files
+    sudo install -m 755 -p -D scripts/mtcClient ${sysconf_dir}/init.d/mtcClient
+    sudo install -m 755 -p -D scripts/hbsClient ${sysconf_dir}/init.d/hbsClient
+    sudo install -m 755 -p -D hwmon/scripts/lsb/hwmon ${sysconf_dir}/init.d/hwmon
+    sudo install -m 755 -p -D fsmon/scripts/fsmon ${sysconf_dir}/init.d/fsmon
+    sudo install -m 755 -p -D scripts/mtclog ${sysconf_dir}/init.d/mtclog
+    sudo install -m 755 -p -D pmon/scripts/pmon ${sysconf_dir}/init.d/pmon
+    sudo install -m 755 -p -D rmon/scripts/rmon ${sysconf_dir}/init.d/rmon
+    sudo install -m 755 -p -D hostw/scripts/hostw ${sysconf_dir}/init.d/hostw
+    sudo install -m 755 -p -D alarm/scripts/mtcalarm.init ${sysconf_dir}/init.d/mtcalarm
+
+    sudo install -m 755 -p -D scripts/config ${sysconf_dir}/init.d/config
+    sudo install -m 755 -p -D scripts/hwclock.sh ${sysconf_dir}/init.d/hwclock.sh
+    sudo install -m 644 -p -D scripts/hwclock.service ${unit_dir}/hwclock.service
+
+    # systemd service files
+    sudo install -m 644 -p -D fsmon/scripts/fsmon.service ${unit_dir}/fsmon.service
+    sudo install -m 644 -p -D hwmon/scripts/hwmon.service ${unit_dir}/hwmon.service
+    sudo install -m 644 -p -D rmon/scripts/rmon.service ${unit_dir}/rmon.service
+    sudo install -m 644 -p -D pmon/scripts/pmon.service ${unit_dir}/pmon.service
+    sudo install -m 644 -p -D hostw/scripts/hostw.service ${unit_dir}/hostw.service
+    sudo install -m 644 -p -D scripts/mtcClient.service ${unit_dir}/mtcClient.service
+    sudo install -m 644 -p -D scripts/hbsClient.service ${unit_dir}/hbsClient.service
+    sudo install -m 644 -p -D scripts/mtclog.service ${unit_dir}/mtclog.service
+    sudo install -m 644 -p -D scripts/goenabled.service ${unit_dir}/goenabled.service
+    sudo install -m 644 -p -D scripts/runservices.service ${unit_dir}/runservices.service
+    sudo install -m 644 -p -D alarm/scripts/mtcalarm.service ${unit_dir}/mtcalarm.service
+
+    # go enabled stuff
+    sudo install -m 755 -d ${local_etc_goenabledd}
+    sudo install -m 755 -p -D scripts/goenabled ${sysconf_dir}/init.d/goenabled
+
+    # start or stop services test script
+    sudo install -m 755 -d ${local_etc_servicesd}
+    sudo install -m 755 -d ${local_etc_servicesd}/controller
+    sudo install -m 755 -d ${local_etc_servicesd}/compute
+    sudo install -m 755 -d ${local_etc_servicesd}/storage
+    sudo install -m 755 -p -D scripts/mtcTest ${local_etc_servicesd}/compute
+    sudo install -m 755 -p -D scripts/mtcTest ${local_etc_servicesd}/controller
+    sudo install -m 755 -p -D scripts/mtcTest ${local_etc_servicesd}/storage
+    sudo install -m 755 -p -D scripts/runservices ${sysconf_dir}/init.d/runservices
+
+    # test tools
+    sudo install -m 755 -p -D scripts/dmemchk.sh ${sbin_dir}
+
+    # process monitor config files
+    sudo install -m 755 -d ${local_etc_pmond}
+    sudo install -m 644 -p -D scripts/mtcClient.conf ${local_etc_pmond}/mtcClient.conf
+    sudo install -m 644 -p -D scripts/hbsClient.conf ${local_etc_pmond}/hbsClient.conf
+    sudo install -m 644 -p -D pmon/scripts/acpid.conf ${local_etc_pmond}/acpid.conf
+    sudo install -m 644 -p -D pmon/scripts/sshd.conf ${local_etc_pmond}/sshd.conf
+    sudo install -m 644 -p -D pmon/scripts/syslog-ng.conf ${local_etc_pmond}/syslog-ng.conf
+    sudo install -m 644 -p -D pmon/scripts/nslcd.conf ${local_etc_pmond}/nslcd.conf
+    sudo install -m 644 -p -D rmon/scripts/rmon.conf ${local_etc_pmond}/rmon.conf
+    sudo install -m 644 -p -D fsmon/scripts/fsmon.conf ${local_etc_pmond}/fsmon.conf
+    sudo install -m 644 -p -D scripts/mtclogd.conf ${local_etc_pmond}/mtclogd.conf
+    sudo install -m 644 -p -D alarm/scripts/mtcalarm.pmon.conf ${local_etc_pmond}/mtcalarm.conf
+
+    # resource monitor config files
+    sudo install -m 755 -d ${local_etc_rmond}
+    sudo install -m 755 -d ${sysconf_dir}/rmonapi.d
+    sudo install -m 755 -d ${sysconf_dir}/rmonfiles.d
+    sudo install -m 755 -d ${sysconf_dir}/rmon_interfaces.d
+    sudo install -m 644 -p -D rmon/scripts/remotelogging_resource.conf ${local_etc_rmond}/remotelogging_resource.conf
+    sudo install -m 644 -p -D rmon/scripts/cinder_virtual_resource.conf ${local_etc_rmond}/cinder_virtual_resource.conf
+    sudo install -m 644 -p -D rmon/scripts/nova_virtual_resource.conf ${local_etc_rmond}/nova_virtual_resource.conf
+    sudo install -m 644 -p -D rmon/scripts/oam_resource.conf ${sysconf_dir}/rmon_interfaces.d/oam_resource.conf
+    sudo install -m 644 -p -D rmon/scripts/management_resource.conf ${sysconf_dir}/rmon_interfaces.d/management_resource.conf
+    sudo install -m 644 -p -D rmon/scripts/infrastructure_resource.conf ${sysconf_dir}/rmon_interfaces.d/infrastructure_resource.conf
+    sudo install -m 755 -p -D rmon/scripts/query_ntp_servers.sh ${sysconf_dir}/rmonfiles.d/query_ntp_servers.sh
+    sudo install -m 755 -p -D rmon/scripts/rmon_reload_on_cpe.sh ${local_etc_goenabledd}/rmon_reload_on_cpe.sh
+
+    # log rotation
+    sudo install -m 755 -d ${local_etc_logrotated}
+    sudo install -m 644 -p -D scripts/mtce.logrotate ${local_etc_logrotated}/mtce.logrotate
+    sudo install -m 644 -p -D hostw/scripts/hostw.logrotate ${local_etc_logrotated}/hostw.logrotate
+    sudo install -m 644 -p -D pmon/scripts/pmon.logrotate ${local_etc_logrotated}/pmon.logrotate
+    sudo install -m 644 -p -D rmon/scripts/rmon.logrotate ${local_etc_logrotated}/rmon.logrotate
+    sudo install -m 644 -p -D fsmon/scripts/fsmon.logrotate ${local_etc_logrotated}/fsmon.logrotate
+    sudo install -m 644 -p -D hwmon/scripts/hwmon.logrotate ${local_etc_logrotated}/hwmon.logrotate
+    sudo install -m 644 -p -D alarm/scripts/mtcalarm.logrotate ${local_etc_logrotated}/mtcalarm.logrotate
+
+    # software development files
+    sudo install -m 644 -p -D heartbeat/mtceHbsCluster.h ${inc_dir}/mtceHbsCluster.h
+    sudo install -m 755 -p -D public/libamon.so.${major} ${lib64_dir}/libamon.so.${major}
+    sudo install -m 755 -p -D rmon/rmonApi/librmonapi.so.${major} ${lib64_dir}/librmonapi.so.${major}
+
+    # volatile directories
+    sudo install -m 755 -d /var
+    sudo install -m 755 -d /var/run
+    popd
+
+    pushd ${lib64_dir}
+    sudo ln -sf libamon.so.${major} libamon.so.${major}.${minor}
+    sudo ln -sf libamon.so.${major} libamon.so
+
+    sudo ln -sf librmonapi.so.${major} librmonapi.so.${major}.${minor}
+    sudo ln -sf librmonapi.so.${major} librmonapi.so
+    popd
+
+}
+
+function install_maintenance {
+    install_mtce_common
+    # components could be seperatly installed if
+    # installation is well controlled in Makefile
+    install_mtce
+}
+
+function configure_maintenance {
+    echo "${PREFIX}/${LIB64DIR}" | sudo tee /etc/ld.so.conf.d/stx-metal.conf
+    sudo ldconfig
+
+    if is_ubuntu; then
+		sudo ln -sf /lib/lsb/init-functions /etc/init.d/functions
+    fi
+
+	if [ -z "$OCF_ROOT" ]; then
+        export OCF_ROOT=/usr/lib/ocf
+	fi
+}
+
+function start_mtcAgent {
+    :
+}
+
+function start_hbsAgent {
+    echo "trigger start hbs agent service"
+    # init hbsAgent
+    # TODO: fix this workaround
+    # No permission to create these 3 files in systemd
+    sudo touch /var/run/hbsAgent.pid
+    sudo touch /var/run/hbsAgent.info
+    sudo touch /var/run/virtual.host
+    sudo chown stack:stack /var/run/hbsAgent.pid
+    sudo chown stack:stack /var/run/hbsAgent.info
+    sudo chown stack:stack /var/run/virtual.host
+
+	# TODO: find a better way to solve the issue
+    # The default shell of ubuntu is dash, which will cause loop syntax error
+    sudo sed -i "s|#!/bin/sh|#!/bin/bash|g" ${PREFIX}/${LIBDIR}/ocf/resource.d/platform/hbsAgent
+    # Don't know why OCF_ROOT doesn't work in ./stack.sh even if env_keep is set
+    sudo sed -i "s|\${OCF_ROOT}|/usr/lib/ocf|g" ${PREFIX}/${LIBDIR}/ocf/resource.d/platform/hbsAgent
+    
+	run_process hbsAgent "${PREFIX}/${LIBDIR}/ocf/resource.d/platform/hbsAgent start"
+}
+
+function start_mtce_control {
+    if is_service_enabled mtce; then
+        echo "start mtcAgent"
+        start_mtcAgent
+    fi
+    if is_service_enabled hbs; then
+        echo "start hbsAgent"
+        start_hbsAgent
+    fi
+}
+
+function start_mtce_compute {
+    :
+}
+
+function start_mtce_storage {
+    :
+}
+function start_maintenance {
+    if is_service_enabled mtce; then
+        echo "start mtce client service"
+        start_mtcClient
+    fi
+    if is_service_enabled hbs; then
+        echo "start hbs client service"
+        start_hbsClient
+    fi
+    if is_service_enabled hostw; then
+        echo "start hostw service"
+        #start_hostw
+    fi
+    if is_service_enabled pmon; then
+        echo "start pmon service"
+        #start_pmon
+    fi
+    if is_service_enabled rmon; then
+        echo "start rmon service"
+        #start_rmon
+    fi
+}
+
+function start_mtcClient {
+    echo "trigger start mtce client service"
+    # init mtcClient
+	# TODO: fix this workaround
+	# No permission to create these 2 files in systemd
+    sudo touch /var/run/mtcClient.pid
+    sudo touch /var/run/mtcClient.info
+    sudo chown stack:stack /var/run/mtcClient.pid
+    sudo chown stack:stack /var/run/mtcClient.info
+    
+	# copy mtcClient.service template to devstack
+    sudo cp ${PREFIX}/${LIBDIR}/systemd/system/mtcClient.service \
+        ${SYSCONFDIR}/systemd/system/devstack@mtcClient.service
+    run_process mtcClient "${SYSCONFDIR}/init.d/mtcClient start"
+}
+
+function start_hbsClient {
+    echo "trigger start hbs client service"
+    # init hbsClient
+	# TODO: fix this workaround
+	# No permission to create these 2 files in systemd
+    sudo touch /var/run/hbsClient.pid
+    sudo touch /var/run/hbsClient.info
+    sudo chown stack:stack /var/run/hbsClient.pid
+    sudo chown stack:stack /var/run/hbsClient.info
+    
+	# copy hbsClient.service template to devstack
+    sudo cp ${PREFIX}/${LIBDIR}/systemd/system/hbsClient.service \
+        ${SYSCONFDIR}/systemd/system/devstack@hbsClient.service
+    run_process hbsClient "${SYSCONFDIR}/init.d/hbsClient start"
+}
+
+function start_hwmon {
+    echo "trigger start hwmon service"
+    run_process hwmon "$STX_METAL_LOCAL_BIN/hwmon"
+}
+
+function start_pmon {
+    echo "trigger start pmon service"
+    run_process pmon "$STX_METAL_LOCAL_BIN/pmond"
+}
+
+function start_rmon {
+    echo "trigger start rmon service"
+    run_process rmon "$STX_METAL_LOCAL_BIN/rmond"
+}
+
+function stop_mtce_control {
+    echo "stop mtcAgent"
+    :
+    echo "stop hbsAgent"
+    :
+}
+
+function stop_mtce_compute {
+    :
+}
+
+function stop_mtce_storage {
+    :
+}
+
+function stop_mtcClient {
+    :
+}
+
+function stop_hbsClient {
+    :
+}
+
+function stop_hwmon {
+    :
+}
+
+function stop_pmon {
+    :
+}
+
+function stop_rmon {
+    :
+}
+
+function stop_maintenance {
+    if is_service_enabled mtce; then
+        echo "stop mtce client services"
+        stop_mtcClient
+    fi
+    if is_service_enabled hbs; then
+        echo "stop hbs client services"
+        stop_hbsClient
+    fi
+    if is_service_enabled hostw; then
+        echo "stop hostw service"
+        stop_hostw
+    fi
+    if is_service_enabled pmon; then
+        echo "stop pmon service"
+        stop_pmon
+    fi
+    if is_service_enabled rmon; then
+        echo "stop rmon service"
+        stop_rmon
+    fi
+}
+
+function cleanup_metal {
+
+    echo "cleanup_metal"
+}
+
+$_XTRACE_STX_METAL
