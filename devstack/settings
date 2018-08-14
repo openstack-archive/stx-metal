@@ -1,0 +1,14 @@
+#!/bin/bash
+# Devstack settings
+
+# Defaults
+# --------
+
+STX_METAL_NAME=stx-metal
+
+######### Plugin Specific ##########
+enable_service $STX_METAL_NAME mtce hostw pmon rmon
+
+# Initial source of lib script
+source $DEST/stx-metal/devstack/lib/stx-metal
+source $DEST/stx-metal/devstack/lib/install_mtce

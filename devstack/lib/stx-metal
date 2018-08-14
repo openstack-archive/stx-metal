@@ -1,0 +1,92 @@
+#!/bin/bash
+#
+# lib/stx-metal
+# Functions to control the configuration and operation of stx-metal
+
+# Dependencies:
+#
+
+# ``stack.sh`` calls the entry points in this order:
+#
+# - preinstall_metal
+# - install_metal
+# - - install_mtce_common
+# - - install_mtce_compute
+# - - install_mtce_control
+# - - install_mtce_storage
+# - - install_mtce
+# - start_metal
+# - - start_mtce
+# - - start_hostw
+# - - start_pmon
+# - - start_rmon
+
+_XTRACE_STX_METAL=$(set +o | grep xtrace)
+set -o xtrace
+
+
+# Defaults
+# --------
+
+GITDIR["$STX_METAL_NAME"]=$DEST/stx-metal
+
+# Functions
+# ---------
+
+function preinstall_metal {
+    if is_ubuntu; then
+        sudo apt-get install -y cppcheck libevent-2.0 libevent-dev libjson0 libjson0-dev
+    else
+        echo "stx-metal isn't available for $DISTRO"
+    fi
+}
+
+function install_metal {
+    install_mtce_common
+    install_mtce_compute
+    install_mtce_control
+    install_mtce_storage
+    install_mtce
+}
+
+function start_metal {
+    if is_service_enabled mtce; then
+        echo "start mtce services"
+        start_mtce
+    fi
+    if is_service_enabled hostw; then
+        echo "start hostw service"
+        start_hostw
+    fi
+    if is_service_enabled pmon; then
+        echo "start pmon service"
+        start_pmon
+    fi
+    if is_service_enabled rmon; then
+        echo "start rmon service"
+        start_rmon
+    fi
+}
+
+function start_mtce {
+    echo "trigger start mtce service"
+}
+
+function start_hostw {
+    echo "trigger start hostw service"
+}
+
+function start_pmon {
+    echo "trigger start pmon service"
+}
+
+function start_rmon {
+    echo "trigger start rmon service"
+}
+
+function cleanup_metal {
+
+    echo "cleanup_metal"
+}
+
+$_XTRACE_STX_METAL
