@@ -428,7 +428,7 @@ void mtcTimer_handler ( int sig, siginfo_t *si, void *uc)
 
 /** Responsible for recovering a host into its enabled state
  *
- * Steps: availibility is either unavailable or failed or intest if previous enable failed
+ * Steps: availability is either unavailable or failed or intest if previous enable failed
  *  1. enable Start
  *     operational = disabled
  *  2. Notify VM Manager                            (signal)
