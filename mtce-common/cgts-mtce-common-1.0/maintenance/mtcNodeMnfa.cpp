@@ -87,7 +87,7 @@ int nodeLinkClass::mnfa_calculate_threshold ( string hostname )
  *
  * Name       : mnfa_add_host
  *
- * Description: Add a failed host the the mnfa count and manage
+ * Description: Add a failed host the mnfa count and manage
  *              the failed list
  *
  *****************************************************************************/
