@@ -1,0 +1,9 @@
+Code-Review+2: Saul Wold <sgw@linux.intel.com>
+Code-Review+2: John Kung <john.kung@windriver.com>
+Workflow+1: Jason McKenna <jason.mckenna@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 24 Aug 2018 17:48:38 +0000
+Reviewed-on: https://review.openstack.org/595368
+Project: openstack/stx-metal
+Branch: refs/heads/master
