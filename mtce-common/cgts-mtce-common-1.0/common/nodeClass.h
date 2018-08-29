@@ -1149,11 +1149,6 @@ private:
     /** Tracks the number of times multi failure avoidance was exited */
     int mnfa_occurances ;
 
-    /** true when the multi node failure count exceeds the multi
-     *  node failure avoidance threshold and until there are no more
-     *  in service trouble hosts */
-    bool mnfa_active ;
-
     /** Recover or exit from the muli-node failure avoidance state
      *  This involves restarting the heartbeat on all the nodes
      *  that remain hbs_minor and clearing any heartbneat degrade
@@ -1427,6 +1422,11 @@ public:
       * to provide maintenance service */
     std::list<string> hostname_inventory ;
     std::list<string>::iterator host ;
+
+    /** true when the multi node failure count exceeds the multi
+     *  node failure avoidance threshold and until there are no more
+     *  in service trouble hosts */
+    bool mnfa_active ;
 
     std::list<string>           mnfa_awol_list ;
     void                        mnfa_timeout_handler ( void );
@@ -1722,18 +1722,26 @@ public:
     int  inotify_shadow_file_fd ;
     int  inotify_shadow_file_wd ;
 
-    /** The multi node failure avoidance type */
+    /* MNFA mode
+     *
+     *   'number'  = absolute 'number' of hosts
+     *   'percent' = percentage of hosts */
     #define MNFA_NUMBER  0
     #define MNFA_PERCENT 1
-    int mnfa_threshold_type    ;
+    int mnfa_mode ;
 
-    /** % of hosts that need to simultaneously fail before 'mnfa' kicks in */
-    int mnfa_threshold_percent ;
+    /* MNFA Timeout
+     *
+     * Time in secs MNFA can remain active.
+     * If 0 then there is no timeout. */
+    int mnfa_timeout ;
 
-    /** # of hosts that need to simultaneously fail before 'mnfa' kicks in */
-    int mnfa_threshold_number  ;
-
-    /** the calculated threshold */
+    /* MNFA Host Involvement Threshold
+     *
+     *   number mode  = number of hosts ...
+     *   percent mode = percent of hosts ...
+     *
+     *   ... simultaneously failing heartbeat */
     int mnfa_threshold ;
 
     /** Calculates and returns the mnfa threshold based on enabled hosts */
@@ -1997,7 +2005,6 @@ public:
     int sysinv_timeout         ;
     int sysinv_noncrit_timeout ;
     int loc_recovery_timeout ; /**< Loss Of Communication Recovery Timeout        */
-    int mnfa_recovery_timeout; /**< Multi-Node-Failure Avoidance Recovery Timeout */
     int work_queue_timeout   ;
     int node_reinstall_timeout ;
 
