@@ -15,8 +15,8 @@ import sys
 import xml.etree.ElementTree as ElementTree
 
 def usage():
-    print "Usage: %s --groups <groups.xml> --pkgdir <pkgdir>" \
-              % os.path.basename(sys.argv[0])
+    print ("Usage: %s --groups <groups.xml> --pkgdir <pkgdir>" \
+              % os.path.basename(sys.argv[0]))
     exit(1)
 
 def add_text_tag_to_xml(parent,
