@@ -1,5 +1,10 @@
 ---
 - project:
+    templates:
+      - build-openstack-sphinx-docs-python3
+      - build-openstack-releasenotes:
+          vars:
+            sphinx_python: python3
     check:
       jobs:
         - openstack-tox-pep8:
