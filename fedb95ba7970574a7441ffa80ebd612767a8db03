@@ -1,0 +1,10 @@
+Code-Review+2: Al Bailey <al.bailey@windriver.com>
+Code-Review+1: Don Penney <don.penney@windriver.com>
+Code-Review+2: Dean Troyer <dtroyer@gmail.com>
+Workflow+1: Dean Troyer <dtroyer@gmail.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Wed, 05 Sep 2018 19:39:26 +0000
+Reviewed-on: https://review.openstack.org/597013
+Project: openstack/stx-metal
+Branch: refs/heads/master
