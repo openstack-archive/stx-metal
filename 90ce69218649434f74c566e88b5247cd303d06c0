@@ -1,0 +1,9 @@
+Code-Review+2: John Kung <john.kung@windriver.com>
+Code-Review+1: Al Bailey <al.bailey@windriver.com>
+Workflow+1: yong hu <yong.hu@intel.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Tue, 11 Sep 2018 00:57:05 +0000
+Reviewed-on: https://review.openstack.org/600291
+Project: openstack/stx-metal
+Branch: refs/heads/master
