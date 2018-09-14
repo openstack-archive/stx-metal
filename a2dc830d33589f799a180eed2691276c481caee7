@@ -1,0 +1,9 @@
+Code-Review+2: Saul Wold <sgw@linux.intel.com>
+Code-Review+1: 98k <18552437190@163.com>
+Workflow+1: Dean Troyer <dtroyer@gmail.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 14 Sep 2018 15:29:35 +0000
+Reviewed-on: https://review.openstack.org/599831
+Project: openstack/stx-metal
+Branch: refs/heads/master
