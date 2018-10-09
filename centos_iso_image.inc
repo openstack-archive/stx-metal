@@ -10,13 +10,13 @@ mtce-hwmon
 mtce-hostw
 
 # cgts-mtce-compute
-cgts-mtce-compute
+mtce-compute
 
 # cgts-mtce-control
-cgts-mtce-control
+mtce-control
 
 # cgts-mtce-storage
-cgts-mtce-storage
+mtce-storage
 
 # pxe-network-installer
 pxe-network-installer
