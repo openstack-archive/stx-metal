@@ -2,7 +2,7 @@
 %define local_etc_goenabledd /%{_sysconfdir}/goenabled.d
 %define local_etc_servicesd  /%{_sysconfdir}/services.d
 
-Name: cgts-mtce-storage
+Name: mtce-storage
 Version: 1.0
 Release: %{tis_patch_ver}%{?_tis_dist}
 Summary: Titanium Cloud Platform Storage Node Maintenance Package

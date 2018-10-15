@@ -4,7 +4,7 @@
 
 %define debug_package %{nil}
 
-Name: cgts-mtce-compute
+Name: mtce-compute
 Version: 1.0
 Release: %{tis_patch_ver}%{?_tis_dist}
 Summary: Compute Node Maintenance Package

@@ -3,7 +3,7 @@
 
 %define debug_package %{nil}
 
-Name: cgts-mtce-control
+Name: mtce-control
 Version: 1.0
 Release: %{tis_patch_ver}%{?_tis_dist}
 Summary: Titanium Cloud Platform Controller Node Maintenance Package
