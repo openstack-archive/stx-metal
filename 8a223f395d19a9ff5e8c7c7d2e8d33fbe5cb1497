@@ -1,0 +1,8 @@
+Code-Review+2: Bin Qian <bin.qian@windriver.com>
+Workflow+1: Eric MacDonald <eric.macdonald@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Tue, 16 Oct 2018 18:51:26 +0000
+Reviewed-on: https://review.openstack.org/608063
+Project: openstack/stx-metal
+Branch: refs/heads/master
