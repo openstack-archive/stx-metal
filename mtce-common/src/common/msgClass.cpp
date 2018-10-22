@@ -309,10 +309,12 @@ int msgClassAddr::getAddressFromInterface(const char* interface, char* address, 
     // if it is infra then we need to determine the interface
     // host name. For management interface, the system hostname
     // is the intf hostname
-    char iface_hostname[MAX_HOST_NAME_SIZE+1] = {0};
-    snprintf(iface_hostname, MAX_HOST_NAME_SIZE,
+    const char* infra_suffix = "-infra";
+    size_t infra_suffix_len = sizeof(infra_suffix);
+    char iface_hostname[MAX_HOST_NAME_SIZE+infra_suffix_len] = {0};
+    snprintf(iface_hostname, sizeof(iface_hostname),
              "%s%s", hostname,
-             (((interface_type == INFRA_IFACE)) ? "-infra" : ""));
+             (((interface_type == INFRA_IFACE)) ? infra_suffix : ""));
 
     struct addrinfo *res = NULL;
     int ret = getaddrinfo(iface_hostname, NULL, NULL, &res);

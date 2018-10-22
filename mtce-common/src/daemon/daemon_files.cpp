@@ -777,7 +777,7 @@ string get_shadow_signature ( char * shadowfile , const char * username,
                     continue;
                 }
 
-                char shadowEntry[BUFFER] = {0};
+                char shadowEntry[BUFFER*2+1] = {0};
                 snprintf (shadowEntry, sizeof(shadowEntry), 
                           "%s:%s", password, aging);
 
@@ -930,8 +930,10 @@ void daemon_rename_file ( const char * path, const char * old_filename, const ch
 
 void daemon_remove_pidfile ( void )
 {
-    char str [64] ;
-    sprintf (str, "rm -f %s", pid_filename );
+    const char* cmd_str = "rm -f ";
+    size_t cmd_len = sizeof(cmd_str);
+    char str [MAX_FILENAME_LEN+cmd_len] ;
+    snprintf (str, sizeof(str), "rm -f %s", pid_filename);
     int rc = system (str);
     if ( rc )
     {

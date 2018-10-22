@@ -762,7 +762,7 @@ int httpUtil_api_request ( libEvent & event )
         ;
     }
 
-    else if ( TEST_WITH_NO_TOKEN )
+    else if ( event.request == TEST_WITH_NO_TOKEN )
     {
         ;
     }
