@@ -39,7 +39,6 @@ make install buildroot=%{buildroot} _sysconfdir=%{_sysconfdir} _unitdir=%{_unitd
 /bin/systemctl enable qemu_clean.service
 
 %files
-%license LICENSE
 %defattr(-,root,root,-)
 
 %{_sysconfdir}/init.d/goenabledCompute

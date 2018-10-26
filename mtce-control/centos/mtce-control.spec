@@ -38,7 +38,6 @@ fi
 exit 0
 
 %files
-%license LICENSE
 %defattr(-,root,root,-)
 %{_sysconfdir}/init.d/goenabledControl
 %{_datarootdir}/licenses/mtce-control-1.0/LICENSE
