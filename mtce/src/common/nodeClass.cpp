@@ -77,7 +77,7 @@ const char mtc_nodeAdminAction_str[MTC_ADMIN_ACTIONS][20] =
 
 const char * get_adminAction_str ( mtc_nodeAdminAction_enum action )
 {
-    if ( action > MTC_ADMIN_ACTIONS )
+    if ( action >= MTC_ADMIN_ACTIONS )
     {
         slog ("Invalid admin action (%d)\n", action);
         action = MTC_ADMIN_ACTION__NONE ;
@@ -94,7 +94,7 @@ const char mtc_nodeAdminState_str[MTC_ADMIN_STATES][15] =
 
 string get_adminState_str ( mtc_nodeAdminState_enum adminState )
 {
-    if ( adminState > MTC_ADMIN_STATES )
+    if ( adminState >= MTC_ADMIN_STATES )
     {
         slog ("Invalid admin state (%d)\n", adminState );
         adminState = MTC_ADMIN_STATE__LOCKED ;
@@ -120,7 +120,7 @@ const char mtc_nodeOperState_str[MTC_OPER_STATES][15] =
 
 string get_operState_str ( mtc_nodeOperState_enum operState )
 {
-    if ( operState > MTC_OPER_STATES )
+    if ( operState >= MTC_OPER_STATES )
     {
         slog ("Invalid oper state (%d)\n", operState );
         operState = MTC_OPER_STATE__DISABLED ;
@@ -7554,18 +7554,19 @@ void nodeLinkClass::manage_pulse_flags ( struct nodeLinkClass::node * node_ptr, 
 int nodeLinkClass::create_pulse_list ( iface_enum iface )
 {
     struct node * ptr = head ;
-    pulses[iface] = 0 ;
     
     /* No check-in list if there is no inventory */
     if (( head == NULL ) || ( hosts == 0 ))
     {
-        return (pulses[iface]) ;       
+          return 0;
     }
 
     if ( iface >= MAX_IFACES )
     {
         dlog ("Invalid interface (%d)\n", iface );
-        return (pulses[iface]);
+        return 0;
+    } else {
+        pulses[iface] = 0;
     }
 
     pulse_list[iface].last_ptr = NULL ;
