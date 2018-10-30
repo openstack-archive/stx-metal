@@ -1,0 +1,10 @@
+Code-Review+2: Eric MacDonald <eric.macdonald@windriver.com>
+Code-Review+1: haitao wang <hai.tao.wang@intel.com>
+Code-Review+2: Saul Wold <sgw@linux.intel.com>
+Workflow+1: Saul Wold <sgw@linux.intel.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Tue, 30 Oct 2018 02:37:06 +0000
+Reviewed-on: https://review.openstack.org/612265
+Project: openstack/stx-metal
+Branch: refs/heads/master
