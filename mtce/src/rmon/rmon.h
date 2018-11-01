@@ -618,7 +618,7 @@ typedef struct
     unsigned int msg_count          ;/**< running pulse count                  */
     unsigned int b2b_miss_peak      ; /**< max number of back to back misses   */
     unsigned int b2b_miss_count     ; /**< current back to back miss count     */
-    unsigned int afailed_count      ; /**< total resouce mon'ing failed count  */
+    unsigned int afailed_count      ; /**< total resource mon'ing failed count  */
     unsigned int recv_err_cnt       ; /**< counts the receive errors           */
     unsigned int send_err_cnt       ; /**< counts the transmit errors          */
 	unsigned int send_msg_count     ; /**< number of messages sent             */
