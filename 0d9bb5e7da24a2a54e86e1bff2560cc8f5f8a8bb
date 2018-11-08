@@ -1,0 +1,10 @@
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Code-Review+1: Scott Little <scott.little@windriver.com>
+Code-Review+2: Tao Liu <tao.liu@windriver.com>
+Workflow+1: Don Penney <don.penney@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 08 Nov 2018 15:32:27 +0000
+Reviewed-on: https://review.openstack.org/615925
+Project: openstack/stx-metal
+Branch: refs/heads/master
