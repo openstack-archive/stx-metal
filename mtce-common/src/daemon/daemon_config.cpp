@@ -269,7 +269,7 @@ void daemon_dump_cfg ( void )
 {
     daemon_config_type * ptr = daemon_get_cfg_ptr();
 
-    ilog ("Configuration Settings\n------------------------------\n");
+    ilog ("Configuration Settings ...\n");
     if ( ptr->scheduling_priority ) { ilog ("scheduling_priority   = %d\n", ptr->scheduling_priority   ); }
 
     if ( ptr->infra_degrade_only )    { ilog ("infra_degrade_only    = %s\n", ptr->infra_degrade_only ? "Yes" : "No" );}
