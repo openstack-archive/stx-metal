@@ -1,0 +1,13 @@
+Metadata-Version: 1.1
+Name: python-inventoryclient
+Version: 1.0
+Summary: A python client library for Inventory
+Home-page: https://wiki.openstack.org/wiki/StarlingX
+Author: Windriver
+Author-email: info@windriver.com
+License: Apache-2.0
+
+A python client library for Inventory
+
+        
+Platform: UNKNOWN
