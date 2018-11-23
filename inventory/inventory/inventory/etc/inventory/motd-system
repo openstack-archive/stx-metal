@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Copyright (c) 2013-2014 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# update inventory MOTD if motd.system content present
+
+[ -f /etc/inventory/motd.system ] && cat /etc/inventory/motd.system || true
