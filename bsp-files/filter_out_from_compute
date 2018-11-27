@@ -162,6 +162,7 @@ openstack-aodh-evaluator
 openstack-aodh-expirer
 openstack-aodh-listener
 openstack-aodh-notifier
+openstack-aodh-config
 openstack-cinder
 openstack-cinder-doc
 openstack-dashboard
