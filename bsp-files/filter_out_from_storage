@@ -128,11 +128,15 @@ openstack-aodh-evaluator
 openstack-aodh-expirer
 openstack-aodh-listener
 openstack-aodh-notifier
+<<<<<<< 1ee175baefa27ee9c24d6b72b2e8be34bcb7f187
 openstack-barbican
 openstack-barbican-api
 openstack-barbican-common
 openstack-barbican-keystone-listener
 openstack-barbican-worker
+=======
+openstack-aodh-config
+>>>>>>> Refactor patches for openstack-aodh package
 openstack-ceilometer-alarm
 openstack-ceilometer-central
 openstack-ceilometer-collector
