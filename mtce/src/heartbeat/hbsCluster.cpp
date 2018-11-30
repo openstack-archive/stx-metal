@@ -43,6 +43,10 @@ typedef struct
     /* Used to threshold storage-0 not responding state */
     unsigned int storage_0_not_responding_count[MTCE_HBS_NETWORKS];
 
+    /* Used to throttle the logging when one network is persistently
+     * reporting different data than the others */
+    mtce_hbs_cluster_entry_type last_network_entry[MTCE_HBS_NETWORKS];
+
     /* Contains the number of monitored networks in the system.
      * Management only = 1
      * Management and Inrastructure = 2 */
@@ -267,7 +271,6 @@ void hbs_cluster_add ( string & hostname )
         ctrl.monitored_hosts = (unsigned short)ctrl.monitored_hostname_list.size();
         ilog ("%s added to cluster", hostname.c_str());
         cluster_list ();
-        ctrl.cluster_change = true ;
     }
 
     /* Manage storage-0 state */
@@ -284,13 +287,6 @@ void hbs_cluster_add ( string & hostname )
 
     /* Manage controller state ; true means enabled in this case. */
     hbs_manage_controller_state ( hostname, true );
-
-    if (( ctrl.cluster_change ) && ( ctrl.sm_socket_ptr ))
-    {
-        hbs_cluster_send( ctrl.sm_socket_ptr, 0 );
-        ctrl.cluster_change = false ;
-    }
-
 }
 
 /****************************************************************************
@@ -557,12 +553,6 @@ void hbs_cluster_update ( iface_enum iface,
         logit = true ;
         logit_reason = "(debug)" ;
     }
-//    else if (( ctrl.cluster_change_threshold_count == 1 ) &&
-//             ( cluster_change == false ))
-//    {
-//        logit = true ;
-//        logit_reason = "" ;
-//    }
     else if ( ctrl.cluster_change_threshold_count >= CLUSTER_CHANGE_THRESHOLD )
     {
         logit = true ;
@@ -576,9 +566,15 @@ void hbs_cluster_update ( iface_enum iface,
         history_ptr->entry[oldest_entry_index].hosts_responding ;
         if ( delta != ctrl.cluster_change_difference_count )
         {
-            logit = true ;
+            if (( ctrl.last_network_entry[n].hosts_enabled != history_ptr->entry[oldest_entry_index].hosts_enabled ) ||
+                ( ctrl.last_network_entry[n].hosts_responding != history_ptr->entry[oldest_entry_index].hosts_responding ))
+            {
+                logit = true ;
+                logit_reason = "(delta)" ;
+            }
             ctrl.cluster_change_difference_count = delta ;
-            logit_reason = "(delta)" ;
+            ctrl.last_network_entry[n].hosts_enabled = history_ptr->entry[oldest_entry_index].hosts_enabled ;
+            ctrl.last_network_entry[n].hosts_responding = history_ptr->entry[oldest_entry_index].hosts_responding ;
         }
     }
 
@@ -598,8 +594,11 @@ void hbs_cluster_update ( iface_enum iface,
     if ( history_ptr->entries < MTCE_HBS_HISTORY_ENTRIES )
         history_ptr->entries++ ;
 
-    /* Manage the next entry update index ; aka the oldest index. */
-    if ( oldest_entry_index == (MTCE_HBS_HISTORY_ENTRIES-1))
+    /* Manage the next entry update index ; aka the oldest index.
+     * - handle not full case ; oldest entry is the first entry
+     * - handle the full case ; wrap around */
+    if (( history_ptr->entries < MTCE_HBS_HISTORY_ENTRIES ) ||
+        ( oldest_entry_index == (MTCE_HBS_HISTORY_ENTRIES-1)))
         history_ptr->oldest_entry_index = 0 ;
     else
         history_ptr->oldest_entry_index++ ;
@@ -678,6 +677,10 @@ unsigned short hbs_cluster_unused_bytes ( void )
  * Returns    : Nothing
  *
  ***************************************************************************/
+void hbs_cluster_send ( void )
+{
+    hbs_cluster_send( ctrl.sm_socket_ptr, 0 );
+}
 
 void hbs_cluster_send ( msgClassSock * sm_client_sock, int reqid )
 {

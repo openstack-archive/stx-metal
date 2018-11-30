@@ -296,6 +296,7 @@ void hbs_sm_handler ( void );
 
 /* send the cluster vault to SM */
 void hbs_cluster_send ( msgClassSock * sm_client_sock, int reqid );
+void hbs_cluster_send ( void );
 
 /* copy cluster data from src to dst */
 void hbs_cluster_copy ( mtce_hbs_cluster_type & src, mtce_hbs_cluster_type & dst );
