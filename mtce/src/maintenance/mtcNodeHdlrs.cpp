@@ -990,8 +990,8 @@ int nodeLinkClass::enable_handler ( struct nodeLinkClass::node * node_ptr )
             clear_service_readies ( node_ptr );
 
             /* Set uptime to zero in mtce and in the database */
-            node_ptr->uptime_save = 0 ;
-            set_uptime ( node_ptr, 0 , false );
+            node_ptr->uptime_save = node_ptr->uptime ;
+            // set_uptime ( node_ptr, 0 , false );
 
             /* start the timer that waits for MTC READY */
             mtcTimer_start ( node_ptr->mtcTimer, mtcTimer_handler, node_ptr->mtcalive_timeout );
@@ -1065,6 +1065,18 @@ int nodeLinkClass::enable_handler ( struct nodeLinkClass::node * node_ptr )
                         enableStageChange(node_ptr, MTC_ENABLE__FAILURE);
                         break ;
                     }
+
+                    else if (( is_controller(node_ptr) == true ) &&
+                             ( node_ptr->mtce_flags & MTC_FLAG__SM_UNHEALTHY ))
+                    {
+                        elog ("%s is SM UNHEALTHY",
+                                  node_ptr->hostname.c_str() );
+                        elog ("%s ... enable failed ; controller needs to reboot\n",
+                                  node_ptr->hostname.c_str());
+                        enableStageChange(node_ptr, MTC_ENABLE__FAILURE);
+                        break ;
+                    }
+
                     /* Set the node mtcAlive timer to configured value.
                      * This will revert bact to normal timeout after any first
                      * unlock value that may be in effect. */
