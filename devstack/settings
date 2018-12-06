@@ -1,19 +1,29 @@
 #!/bin/bash
 # Devstack settings
 
+# Servcies
+# stx-metal - Overall enable for this plugin
+
+# mtce
+# mtce-control
+# mtce-compute
+# mtce-storage
+
+# hbs
+# pmon
+# rmon
+# hwmon
+# mtclog
+# mtcalarm
+# fsmon
+
 # Defaults
 # --------
 
 STX_METAL_NAME=stx-metal
 
 ######### Plugin Specific ##########
-# Enable service for node type
-enable_service $STX_METAL_NAME mtce-compute mtce-control mtce-storage
-
-# TODO:remove the services enabled by default once
-# stx-metal is completely enabled
-# Enable service for components
-enable_service hbs mtce pmon rmon hwmon mtclog mtcalarm fsmon
+enable_service $STX_METAL_NAME
 
 # Be careful to enable hostw, it will restart your host
 # if some config is not correct

@@ -5,42 +5,15 @@
 
 # Dependencies:
 #
+# - The stx-update and stx-fault plugins must be enabled
 
 # ``stack.sh`` calls the entry points in this order:
 #
-# - install_maintenance
-# - - install_mtce_common
-# - - install_mtce
-# - install_mtce_compute
-# - install_mtce_control
-# - install_mtce_storage
-#
-# - configure_maintenance
-#
-# - start_maintenance
-# - - start_mtcClient
-# - - start_hbsClient
-# - - start_pmon
-# - - start_rmon
-# - start_mtce_compute
-# - start_mtce_control
-# - - start_mtcAgent
-# - - start_hbsAgent
-# - - start_hwmon
-# - start_mtce_storage
-#
-# - stop_maintenance
-# - - stop_mtcClient
-# - - stop_hbsClient
-# - - stop_pmon
-# - - stop_rmon
-# - stop_mtce_compute
-# - stop_mtce_control
-# - - stop_mtcAgent
-# - - stop_hbsAgent
-# - - stop_hwmon
-# - stop_mtce_storage
-#
+# - install_metal
+# - configure_metal
+# - init_fault
+# - start_metal
+# - stop_metal
 # - cleanup_metal
 
 _XTRACE_STX_METAL=$(set +o | grep xtrace)
@@ -60,15 +33,21 @@ SW_VERSION=18.10
 # Functions
 # ---------
 
-function uninstall_files() {
-    local dest_dir=$1
-    local dest_file_array=($2)
-    local file=""
+function configure_metal {
+    configure_maintenance
+}
 
-    for (( i=0; i<${#dest_file_array[*]}; i++ )); do
-        file=${dest_file_array[$i]##*/}
-        sudo rm -rf $dest_dir/$file
-    done
+function install_metal {
+    install_maintenance
+    if is_service_enabled mtce-compute; then
+        install_mtce_compute
+    fi
+    if is_service_enabled mtce-control; then
+        install_mtce_control
+    fi
+    if is_service_enabled mtce-storage; then
+        install_mtce_storage
+    fi
 }
 
 function install_mtce_common {
@@ -502,6 +481,19 @@ function start_hwmon {
     run_process hwmon "${PREFIX}/lib/ocf/resource.d/platform/hwmon start" root root
 }
 
+function start_metal {
+    if is_service_enabled mtce-control; then
+        start_mtce_control
+    fi
+    if is_service_enabled mtce-compute; then
+        start_mtce_compute
+    fi
+    if is_service_enabled mtce-storage; then
+        start_mtce_storage
+    fi
+    start_maintenance
+}
+
 function start_mtce_control {
     # start goenabled control
     sudo ${SYSCONFDIR}/init.d/goenabledControl start
@@ -667,6 +659,19 @@ function start_hostw {
         ${SYSCONFDIR}/systemd/system/devstack@hostw.service
 
     run_process hostw "${SYSCONFDIR}/rc.d/init.d/hostw start" root root
+}
+
+function stop_metal {
+    stop_maintenance
+    if is_service_enabled mtce-control; then
+        stop_mtce_control
+    fi
+    if is_service_enabled mtce-compute; then
+        stop_mtce_compute
+    fi
+    if is_service_enabled mtce-storage; then
+        stop_mtce_storage
+    fi
 }
 
 function stop_mtcAgent {
@@ -1014,6 +1019,17 @@ function cleanup_metal {
         # systemd dir
         sudo rm -rf ${unit_dir}/goenabled-storage.service
     fi
+}
+
+function uninstall_files {
+    local dest_dir=$1
+    local dest_file_array=($2)
+    local file=""
+
+    for (( i=0; i<${#dest_file_array[*]}; i++ )); do
+        file=${dest_file_array[$i]##*/}
+        sudo rm -rf $dest_dir/$file
+    done
 }
 
 $_XTRACE_STX_METAL
