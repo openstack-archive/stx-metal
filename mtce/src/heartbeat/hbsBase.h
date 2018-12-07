@@ -232,6 +232,9 @@ void   hbs_cluster_history_clear( mtce_hbs_cluster_type & cluster );
 
 /******** Heartbeat Agent Cluster Functions in hbsCluster.cpp ********/
 
+/* Init the control structure */
+void hbs_cluster_ctrl_init ( void );
+
 /* Set the cluster vault to default state.
  * Called upon daemon init or heartbeat period change. */
 void hbs_cluster_init ( unsigned short period , msgClassSock * sm_socket_ptr );
@@ -240,10 +243,18 @@ void hbs_cluster_init ( unsigned short period , msgClassSock * sm_socket_ptr );
  * Primarily to know how many history elements are missing. */
 unsigned short hbs_cluster_unused_bytes ( void );
 
+/* Inform the cluster module that there was a change to the cluster */
+void hbs_cluster_change ( string cluster_change_reason );
+
 /* Add and delete hosts from the monitored list.
  * Automatically adjusts the numbers in the cluster vault. */
 void hbs_cluster_add  ( string & hostname );
 void hbs_cluster_del  ( string & hostname );
+void hbs_cluster_rem  ( unsigned short controller );
+void hbs_cluster_lock ( void );
+
+/* Do stuff in preparation for another pulse period start */
+void hbs_cluster_period_start ( void );
 
 /* Report status of storgate-0 */
 void hbs_cluster_storage0_status ( iface_enum iface , bool responding );
@@ -266,6 +277,9 @@ int  hbs_cluster_save (               string & hostname,
                         mtce_hbs_network_enum  network,
                             hbs_message_type & msg );
 
+/* Manage peer controller vault history. */
+void hbs_cluster_peer ( void );
+
 /*
  * Called by the hbsAgent pulse receiver to create a network specific
  * history update entry consisting of
@@ -285,6 +299,19 @@ void hbs_cluster_update ( iface_enum iface,
  * the other controller back in its response. */
 void hbs_cluster_append ( hbs_message_type & msg );
 
+/* Inject a history entry at the next position for all networks of the
+ * specified controller.
+ *
+ * This is used to add a 0:0 entry into the vault history of the specified
+ * controller as indication that that no host for this pulse period
+ * provided history for this controller.
+ *
+ * Procedure was made generic so that it 'could' be used to add history
+ * of any values for fault insertion or other potential future purposes
+ */
+void hbs_cluster_inject ( unsigned short controller, unsigned short hosts_enabled, unsigned short hosts_responding );
+
+
 /* Produce formatted clog's that characterize current and changing cluster
  * history for a given network. Each log is controller/network specific. */
 void hbs_cluster_log  ( string & hostname,                                  string prefix, bool force=false );
@@ -295,13 +322,14 @@ void hbs_cluster_log  ( string & hostname, mtce_hbs_cluster_type & cluster, stri
 void hbs_sm_handler ( void );
 
 /* send the cluster vault to SM */
-void hbs_cluster_send ( msgClassSock * sm_client_sock, int reqid );
+void hbs_cluster_send ( msgClassSock * sm_client_sock, int reqid , string reason );
 
 /* copy cluster data from src to dst */
 void hbs_cluster_copy ( mtce_hbs_cluster_type & src, mtce_hbs_cluster_type & dst );
 
 /* print the contents of the vault */
-void hbs_cluster_dump ( mtce_hbs_cluster_type & vault, string log_prefix, bool force );
+void hbs_cluster_dump ( mtce_hbs_cluster_history_type & history, bool storage0_enabled );
+void hbs_cluster_dump ( mtce_hbs_cluster_type & vault, string reason );
 
 /* Heartbeat service state audit */
 void hbs_state_audit ( void );
