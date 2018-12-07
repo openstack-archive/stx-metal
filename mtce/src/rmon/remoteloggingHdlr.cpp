@@ -299,7 +299,10 @@ int rmonHdlr_remotelogging_query (resource_config_type * ptr)
         SFmAlarmDataT active_alarm;
 
         memset(cmd_output, 0, CONNECTION_STATUS_COMMAND_OUTPUT_BUFFER_SIZE);
-        fgets((char*) &cmd_output, CONNECTION_STATUS_COMMAND_OUTPUT_BUFFER_SIZE, pFile);
+        if (fgets((char*) &cmd_output, CONNECTION_STATUS_COMMAND_OUTPUT_BUFFER_SIZE, pFile) == NULL)
+        {
+            wlog("Error reading command output for getting remote logging tcp port status");
+        }
         pclose(pFile);
         std::stringstream s(cmd_output);
         s >> std::hex >> connection_status;

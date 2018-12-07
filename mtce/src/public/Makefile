@@ -7,8 +7,8 @@
 SRCS = amon.c
 OBJS = $(SRCS:.c=.o)
 INCLUDES = -I.
-LDFLAGS = -shared
-CFLAGS = -fPIC -g -O2 -Wall -Wextra -Werror
+LDFLAGS = -shared -Wl,-z,noexecstack,-z,relro,-z,now
+CFLAGS = -fPIC -g -O2 -Wall -Wextra -Werror -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
 TARGET_LIB = libamon.so
 lib: build
 ifeq (,$(shell which ${CC}))

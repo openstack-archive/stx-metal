@@ -10,6 +10,8 @@ LDLIBS = -lstdc++ -ldaemon -lcommon -lrt -lcrypto -lfmcommon -ljson-c
 INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -I../hostw
 CCFLAGS = -g -O2 -Wall -Wextra -Werror
+EXTRACCFLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
+LDFLAGS = -Wl,-z,noexecstack,-z,relro,-z,now
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
@@ -27,7 +29,7 @@ else
 endif
 
 build: clean static_analysis $(OBJS)
-	$(CXX) $(CCFLAGS) $(OBJS) -L../daemon -L../common $(LDLIBS) -o pmond
+	$(CXX) $(LDFLAGS) $(CCFLAGS) $(OBJS) -L../daemon -L../common $(LDLIBS) -o pmond
 
 common:
 	( cd ../common ; make clean ; make lib VER=$(VER) VER_MJR=$(VER_MJR))

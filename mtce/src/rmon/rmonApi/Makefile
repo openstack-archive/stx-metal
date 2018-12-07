@@ -7,8 +7,9 @@
 SRCS = rmon_api.c
 OBJS = $(SRCS:.c=.o)
 INCLUDES = -I.
-LDFLAGS = -shared
+LDFLAGS = -shared -Wl,-z,noexecstack,-z,relro,-z,now
 CFLAGS = -fPIC -g -O2 -Wall -Wextra -Werror
+EXTRACCFLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
 TARGET_LIB = librmonapi.so
 lib: build
 ifeq (,$(shell which ${CC}))

@@ -12,6 +12,8 @@ INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -I../common -I../alarm -I../maintenance -I../public
 
 CCFLAGS = -g -O2 -Wall -Wextra -Werror
+EXTRACCFLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
+LDFLAGS = -Wl,-z,noexecstack,-z,relro,-z,now
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
@@ -31,8 +33,8 @@ endif
 all: static_analysis common agent client
 
 build: static_analysis $(OBJS)
-	$(CXX) $(CCFLAGS) hbsAlarm.o hbsAgent.o hbsUtil.o hbsCluster.o hbsStubs.o ../common/nodeClass.o -L../public -L../alarm $(LDLIBS) -o hbsAgent
-	$(CXX) $(CCFLAGS) hbsClient.o hbsPmon.o hbsUtil.o -L../public -L../alarm $(LDLIBS) -o hbsClient
+	$(CXX) $(CCFLAGS) $(LDFLAGS) hbsAlarm.o hbsAgent.o hbsUtil.o hbsCluster.o hbsStubs.o ../common/nodeClass.o -L../public -L../alarm $(LDLIBS) -o hbsAgent
+	$(CXX) $(CCFLAGS) $(LDFLAGS) hbsClient.o hbsPmon.o hbsUtil.o -L../public -L../alarm $(LDLIBS) -o hbsClient
 
 common:
 	( cd ../common ; make clean ; make lib VER=$(VER) VER_MJR=$(VER_MJR))

@@ -10,7 +10,8 @@ LDLIBS = -lstdc++ -lrmonapi -lrt
 INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -I..
 CCFLAGS = -g -O2 -Wall -Wextra -Werror
-
+EXTRACCFLAGS = -fstack-protector-strong -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
+LDFLAGS = -Wl,-z,noexecstack,-z,relro,-z,now
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
  
@@ -27,7 +28,7 @@ else
 endif
 
 build: clean static_analysis $(OBJS)
-	$(CXX) $(CCFLAGS) $(OBJS) -L../../common -L../../daemon -L../rmonApi/ $(LDLIBS) -o rmon_resource_notify
+	$(CXX) $(LDFLAGS) $(CCFLAGS) $(OBJS) -L../../common -L../../daemon -L../rmonApi/ $(LDLIBS) -o rmon_resource_notify
 
 clean: 
 	@rm -v -f $(OBJ) rmon_resource_notify *.o *.a

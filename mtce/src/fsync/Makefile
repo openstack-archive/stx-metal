@@ -9,14 +9,15 @@ OBJS = $(SRCS:.c=.o)
 LDLIBS = -L.
 INCLUDES = -I.
 CCFLAGS = -g -O2 -Wall -Wextra -Werror
-
+EXTRACCFLAGS = -fstack-protector-strong -O2 -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
+LDFLAGS = -Wl,-z,noexecstack,-z,relro,-z,now
 all: build
 
 .c.o:
 	$(CC) $(INCLUDES) $(CCFLAGS) $(EXTRACCFLAGS) -c $< -o $@
 
 build: $(OBJS)
-	$(CC) $(OBJS) $(LDLIBS) -o fsync
+	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o fsync
 
 clean: 
 	@rm -v -f $(OBJS) fsync

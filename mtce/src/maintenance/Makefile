@@ -55,7 +55,8 @@ LDLIBS += -lstdc++ -ldaemon -lcommon -lthreadUtil -lipmiUtil -lfmcommon -lrmonap
 INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -I../common -I../alarm -I../heartbeat -I../hwmon -I../public -I../rmon/rmonApi
 CCFLAGS += -g -O2 -Wall -Wextra -Werror -Wno-missing-braces
-
+EXTRACCFLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
+LDFLAGS = -Wl,-z,noexecstack,-z,relro,-z,now
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
 
@@ -77,10 +78,10 @@ common:
 	( cd ../common ; make clean ; make lib VER=$(VER) VER_MJR=$(VER_MJR))
 
 mtcAgent: $(OBJS)
-	$(CXX) $(CONTROL_OBJS) -L../public -L../alarm -L../rmon/rmonApi $(LDLIBS) -o mtcAgent
+	$(CXX) $(LDFLAGS) $(CONTROL_OBJS) -L../public -L../alarm -L../rmon/rmonApi $(LDLIBS) -o mtcAgent
 
 mtcClient: $(OBJS)
-	$(CXX) $(COMPUTE_OBJS) -L../public -L../alarm -L../rmon/rmonApi $(LDLIBS) -o mtcClient
+	$(CXX) $(LDFLAGS) $(COMPUTE_OBJS) -L../public -L../alarm -L../rmon/rmonApi $(LDLIBS) -o mtcClient
 
 remove_bins:
 	@rm -v -f $(BINS)

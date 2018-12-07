@@ -10,6 +10,7 @@ OBJS = daemon_main.o   daemon_ini.o   daemon_debug.o   daemon_signal.o   daemon_
 OBJS = $(SRCS:.cpp=.o)
 INCLUDES = -I. -I../common
 CCFLAGS = -g -O2 -Wall -Wextra -Werror -DBUILDINFO="\"$$(date)\""
+CCFLAGS += -fstack-protector-strong -D_FORTIFY_SOURCE=2 -Wformat -Wformat-security
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
