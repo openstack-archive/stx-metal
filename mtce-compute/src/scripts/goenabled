@@ -155,8 +155,8 @@ function status()
 ################################################################################
 
 # Don't run this till compute is configured
-if [ ! -e $VOLATILE_COMPUTE_CONFIG_COMPLETE ] ; then
-    logger "Compute is not configured"
+if [ ! -e $VOLATILE_WORKER_CONFIG_COMPLETE ] ; then
+    logger "Worker is not configured"
     exit $RETVAL
 fi
 

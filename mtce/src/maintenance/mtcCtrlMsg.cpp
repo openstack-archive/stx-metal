@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016 Wind River Systems, Inc.
+ * Copyright (c) 2013-2018 Wind River Systems, Inc.
 *
 * SPDX-License-Identifier: Apache-2.0
 *
@@ -63,11 +63,11 @@ int send_guest_command ( string hostname, int command )
               hostname.c_str(),
               obj_ptr->functions.c_str(),
               obj_ptr->get_nodetype(hostname),
-              obj_ptr->is_compute (hostname)            ? 'Y' : 'n',
-              obj_ptr->is_compute_subfunction(hostname) ? 'Y' : 'n');
+              obj_ptr->is_worker (hostname)            ? 'Y' : 'n',
+              obj_ptr->is_worker_subfunction(hostname) ? 'Y' : 'n');
 
-    if ( obj_ptr->is_compute            (hostname) ||
-         obj_ptr->is_compute_subfunction(hostname))
+    if ( obj_ptr->is_worker            (hostname) ||
+         obj_ptr->is_worker_subfunction(hostname))
     {
         mtc_message_type msg ; /* the message to send */
 
@@ -244,7 +244,7 @@ int mtc_service_inbox ( nodeLinkClass   *  obj_ptr,
     /*
      * Check for compute messages
      */
-    else if ( strstr ( &msg.hdr[0], get_compute_msg_header() ) )
+    else if ( strstr ( &msg.hdr[0], get_worker_msg_header() ) )
     {
             if ( msg.cmd == MTC_MSG_MTCALIVE )
             {

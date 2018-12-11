@@ -1372,8 +1372,8 @@ public:
     bool is_controller ( struct nodeLinkClass::node * node_ptr );
 
     /** Check if a node is a compute */
-    bool is_compute             ( struct nodeLinkClass::node * node_ptr );
-    bool is_compute_subfunction ( struct nodeLinkClass::node * node_ptr );
+    bool is_worker             ( struct nodeLinkClass::node * node_ptr );
+    bool is_worker_subfunction ( struct nodeLinkClass::node * node_ptr );
 
     string get_node_function_str    ( string hostname );
     string get_node_subfunction_str ( string hostname );
@@ -1385,8 +1385,8 @@ public:
     bool is_controller ( string & hostname );
 
     /** Check if a node is a compute by hostname */
-    bool is_compute             ( string & hostname );
-    bool is_compute_subfunction ( string & hostname );
+    bool is_worker             ( string & hostname );
+    bool is_worker_subfunction ( string & hostname );
 
     /** Check if a node is a storage by hostname */
     bool is_storage ( string & hostname );
