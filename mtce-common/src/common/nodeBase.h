@@ -116,7 +116,7 @@ void daemon_exit ( void );
 
 
 #define GOENABLED_DIR           ((const char *)"/etc/goenabled.d")    /* generic */
-#define GOENABLED_COMPUTE_DIR   ((const char *)"/etc/goenabled.d/compute")
+#define GOENABLED_WORKER_DIR    ((const char *)"/etc/goenabled.d/worker")
 #define GOENABLED_STORAGE_DIR   ((const char *)"/etc/goenabled.d/storage")
 #define GOENABLED_CONTROL_DIR   ((const char *)"/etc/goenabled.d/control")
 
@@ -129,11 +129,11 @@ void daemon_exit ( void );
 #define GOENABLED_SUBF_FAIL     ((const char *)"/var/run/goenabled_subf_failed")
 
 #define CONFIG_COMPLETE_CONTROL ((const char *)"/var/run/.controller_config_complete")
-#define CONFIG_COMPLETE_COMPUTE ((const char *)"/var/run/.compute_config_complete")
+#define CONFIG_COMPLETE_WORKER  ((const char *)"/var/run/.worker_config_complete")
 #define CONFIG_COMPLETE_STORAGE ((const char *)"/var/run/.storage_config_complete")
 #define CONFIG_COMPLETE_FILE    ((const char *)"/etc/platform/.initial_config_complete")
 
-#define DISABLE_COMPUTE_SERVICES ((const char *)"/var/run/.disable_compute_services")
+#define DISABLE_WORKER_SERVICES ((const char *)"/var/run/.disable_worker_services")
 
 #define PATCHING_IN_PROG_FILE   ((const char *)"/var/run/patch_installing")
 #define NODE_IS_PATCHED_FILE    ((const char *)"/var/run/node_is_patched")
@@ -380,7 +380,7 @@ void daemon_exit ( void );
 #define CGTS_NODE_TYPE_SIZE 12
 #define CGTS_NODE_NULL      (0x00)
 #define CONTROLLER_TYPE     (0x01)
-#define COMPUTE_TYPE        (0x02)
+#define WORKER_TYPE        (0x02)
 #define STORAGE_TYPE        (0x04)
 #define CGCS_STORAGE_NFS     0
 #define CGCS_STORAGE_CEPH    1
@@ -454,7 +454,7 @@ const char * get_hbs_cmd_req_header    ( void ) ;
 const char * get_cmd_req_msg_header    ( void ) ;
 const char * get_cmd_rsp_msg_header    ( void ) ;
 const char * get_msg_rep_msg_header    ( void ) ;
-const char * get_compute_msg_header    ( void ) ;
+const char * get_worker_msg_header    ( void ) ;
 const char * get_mtc_log_msg_hdr       ( void ) ;
 const char * get_pmond_pulse_header    ( void ) ;
 const char * get_mtce_event_header     ( void ) ;

@@ -783,7 +783,7 @@ int pmon_passive_handler ( process_config_type * ptr )
          *
          *  /etc/pmon.d/<process.conf> files that declare
          *
-         *  subfunction = compute
+         *  subfunction = worker
          *  or
          *  subfunction = storage
          *
@@ -808,9 +808,9 @@ int pmon_passive_handler ( process_config_type * ptr )
                 pmon_ctrl_type * ctrl_ptr = get_ctrl_ptr() ;
                 if ( ptr->subfunction )
                 {
-                    if ( !strcmp (ptr->subfunction, "compute" ) )
+                    if ( !strcmp (ptr->subfunction, "worker" ) )
                     {
-                        config_filename = CONFIG_COMPLETE_COMPUTE ;
+                        config_filename = CONFIG_COMPLETE_WORKER ;
                     }
                     else if ( !strcmp (ptr->subfunction, "storage" ) )
                     {
@@ -827,7 +827,7 @@ int pmon_passive_handler ( process_config_type * ptr )
                     else if (( ctrl_ptr->system_type != SYSTEM_TYPE__NORMAL ) &&
                              ( !strcmp (ptr->subfunction, "last-config" )))
                     {
-                        config_filename = CONFIG_COMPLETE_COMPUTE ;
+                        config_filename = CONFIG_COMPLETE_WORKER ;
                         dlog ("%s dependency over-ride ; will wait for %s\n",
                                   ptr->process,
                                   config_filename.c_str());
@@ -851,11 +851,11 @@ int pmon_passive_handler ( process_config_type * ptr )
                     }
                     else if ( !strcmp (ptr->subfunction, "compute" ) )
                     {
-                        if ( daemon_is_file_present ( DISABLE_COMPUTE_SERVICES ) == true )
+                        if ( daemon_is_file_present ( DISABLE_WORKER_SERVICES ) == true )
                         {
                             /* Compute services are disabled - do not start monitoring */
                             start_monitoring = false;
-                            waiting_for = DISABLE_COMPUTE_SERVICES;
+                            waiting_for = DISABLE_WORKER_SERVICES;
                         }
                     }
 

@@ -34,7 +34,7 @@ const char mtc_msg_rep_msg_header [MSG_HEADER_SIZE] = {"cgts mtc rep msg:"};
 const char mtc_log_msg_hdr    [MSG_HEADER_SIZE]     = {"cgts mtc log msg:"};
 
 /** Maintenance Message header content */
-const char mtc_compute_msg_header [MSG_HEADER_SIZE] = {"cgts mtc message:"};
+const char mtc_worker_msg_header [MSG_HEADER_SIZE] = {"cgts mtc message:"};
 
 const char mtc_event_hdr [MSG_HEADER_SIZE] =          {"mtce event msg  :"};
 
@@ -50,7 +50,7 @@ const char * get_loopback_header       (void) { return mtc_loopback_hdr;}
 const char * get_hbs_cmd_req_header    (void) { return mtc_hbs_cmd_req_header ;}
 const char * get_cmd_req_msg_header    (void) { return mtc_cmd_req_msg_header ;}
 const char * get_cmd_rsp_msg_header    (void) { return mtc_cmd_rsp_msg_header ;}
-const char * get_compute_msg_header    (void) { return mtc_compute_msg_header ;}
+const char * get_worker_msg_header      (void) { return mtc_worker_msg_header ;}
 const char * get_pmond_pulse_header    (void) { return mtc_pmond_pulse_header ;}
 const char * get_mtc_log_msg_hdr       (void) { return mtc_log_msg_hdr        ;}
 const char * get_mtce_event_header     (void) { return mtc_event_hdr          ;}

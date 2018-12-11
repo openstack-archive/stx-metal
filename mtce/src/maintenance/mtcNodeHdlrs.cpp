@@ -1472,7 +1472,7 @@ int nodeLinkClass::enable_handler ( struct nodeLinkClass::node * node_ptr )
 
             if (( CPE_SYSTEM ) && ( is_controller(node_ptr)))
             {
-                ilog ("%s running compute sub-function enable handler\n", node_ptr->hostname.c_str());
+                ilog ("%s running worker sub-function enable handler\n", node_ptr->hostname.c_str());
                 mtcInvApi_update_task ( node_ptr, MTC_TASK_ENABLING_SUBF );
                 adminActionChange ( node_ptr, MTC_ADMIN_ACTION__ENABLE_SUBF );
             }
@@ -2181,8 +2181,8 @@ int nodeLinkClass::recovery_handler ( struct nodeLinkClass::node * node_ptr )
                      * system. */
                     if ( NOT_THIS_HOST )
                     {
-                        /* start a timer that waits for the /var/run/.compute_config_complete flag */
-                        mtcTimer_start ( node_ptr->mtcTimer, mtcTimer_handler, MTC_COMPUTE_CONFIG_TIMEOUT );
+                        /* start a timer that waits for the /var/run/.worker_config_complete flag */
+                        mtcTimer_start ( node_ptr->mtcTimer, mtcTimer_handler, MTC_WORKER_CONFIG_TIMEOUT );
 
                         /* We will come back to MTC_RECOVERY__HEARTBEAT_START
                          * after we enable the compute subfunction */
@@ -5373,7 +5373,7 @@ int nodeLinkClass::add_handler ( struct nodeLinkClass::node * node_ptr )
 
             if (( CPE_SYSTEM ) && ( is_controller(node_ptr) == true ))
             {
-                if ( daemon_is_file_present ( CONFIG_COMPLETE_COMPUTE ) == false )
+                if ( daemon_is_file_present ( CONFIG_COMPLETE_WORKER ) == false )
                 {
                     if ( node_ptr->operState_subf != MTC_OPER_STATE__DISABLED )
                     {
@@ -5593,7 +5593,7 @@ int nodeLinkClass::add_handler ( struct nodeLinkClass::node * node_ptr )
             {
                 send_hwmon_command ( node_ptr->hostname, MTC_CMD_ADD_HOST );
             }
-            if ( ( CPE_SYSTEM ) || ( is_compute (node_ptr) == true ))
+            if ( ( CPE_SYSTEM ) || ( is_worker (node_ptr) == true ))
             {
                 send_guest_command ( node_ptr->hostname, MTC_CMD_ADD_HOST );
             }
