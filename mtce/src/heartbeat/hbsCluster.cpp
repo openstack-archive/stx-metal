@@ -30,6 +30,9 @@ typedef struct
     /* Contains the controller number (0 or 1) for this controller. */
     unsigned short this_controller ;
 
+    /* set true if this controller is locked. */
+    bool locked ;
+
     /* Preserves which controllers are enabled. */
     bool controller_0_enabled ;
     bool controller_1_enabled ;
@@ -460,7 +463,7 @@ void hbs_cluster_update ( iface_enum iface,
                       unsigned short not_responding_hosts,
                                 bool storage_0_responding )
 {
-    if ( ctrl.monitored_hosts == 0 )
+    if (( ctrl.monitored_hosts == 0 ) || ( ctrl.locked ))
         return ;
 
     /* convert heartbeat iface enum to cluster network enum. */
@@ -640,6 +643,8 @@ void hbs_cluster_append ( hbs_message_type & msg )
             ctrl.this_controller, ctrl.monitored_networks, ctrl.cluster.histories, msg.cluster.bytes );
 }
 
+bool peer_history_missing = false ;
+
 /* Manage peer controller vault history. */
 void hbs_cluster_peer ( void )
 {
@@ -649,11 +654,18 @@ void hbs_cluster_peer ( void )
     if (( ctrl.got_peer_controller_history == false ) &&
         ( ctrl.peer_controller_enabled == true ))
     {
-        ilog ("missing peer controller cluster view" ); /* ERIK: DEBUG */
-
+        if ( peer_history_missing == false )
+        {
+            wlog ( "missing peer controller cluster view" );
+            peer_history_missing = true ;
+        }
         /* if no nodes have reported peer controller history then inject
          * a 0:0 value in for this pulse period for that controller. */
         hbs_cluster_inject ( ctrl.this_controller?0:1, 0, 0 );
+    }
+    else if ( peer_history_missing == true )
+    {
+        peer_history_missing = false ;
     }
 }
 
@@ -950,4 +962,5 @@ void hbs_cluster_lock( void )
         memset ( &ctrl.cluster.history[h], 0, sizeof(mtce_hbs_cluster_history_type));
     }
     ctrl.cluster.histories = 0 ;
+    ctrl.locked = true ;
 }

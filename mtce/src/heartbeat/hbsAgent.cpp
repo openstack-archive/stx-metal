@@ -1183,11 +1183,11 @@ int send_event ( string & hostname, unsigned int event_cmd, iface_enum iface )
     memset (&event, 0 , sizeof(mtc_message_type));
     if ( event_cmd == MTC_EVENT_HEARTBEAT_LOSS )
     {
-        // daemon_dump_membuf_banner ();
-        hbsInv.print_node_info ();
+        if ( hbs_config.debug_state == 2 )
+        {
+            hbsInv.print_node_info ();
+        }
         hbs_cluster_log ( hbsInv.my_hostname, "event", true );
-
-        // daemon_dump_membuf ();
         snprintf ( &event.hdr[0] , MSG_HEADER_SIZE, "%s", get_heartbeat_loss_header());
     }
     else if ( event_cmd == MTC_EVENT_LOOPBACK )
