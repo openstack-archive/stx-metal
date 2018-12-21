@@ -442,7 +442,7 @@ int daemon_configure ( void )
     /* pull in the degrade only config option */
     hbsInv.infra_degrade_only = hbs_config.infra_degrade_only ;
 
-    if ( hbsInv.hbs_degrade_threshold >= hbsInv.hbs_failure_threshold )
+    if ( hbsInv.hbs_degrade_threshold <= hbsInv.hbs_failure_threshold )
     {
         wlog ("Degrade threshold should be larger than Failure threshold\n");
         wlog ("Heartbeat 'degrade' state disabled ; see %s\n", MTCE_CONF_FILE);
@@ -450,7 +450,7 @@ int daemon_configure ( void )
     for ( ;; )
     {
         get_ip_addresses ( hbsInv.my_hostname, hbsInv.my_local_ip , hbsInv.my_float_ip );
-        if ( hbsInv.my_float_ip.empty() || hbsInv.my_float_ip.empty() )
+        if ( hbsInv.my_local_ip.empty() || hbsInv.my_float_ip.empty() )
         {
             if ( waiting_msg == false )
             {
