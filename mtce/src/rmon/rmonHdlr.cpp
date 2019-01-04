@@ -4818,11 +4818,15 @@ void rmon_service (rmon_ctrl_type * ctrl_ptr)
             _postPMs();
         }
 
+#ifdef WANT_NTP_MONITORING
+
         //We only monitor the NTP servers on the controller node
         if ( is_controller() )
         {
             ntp_audit_handler ();
         }
+
+#endif
 
         /* loop through all the resource timers waiting for a ring */ 
         for ( int j = 0 ; j < ctrl_ptr->resources ; j++ )
