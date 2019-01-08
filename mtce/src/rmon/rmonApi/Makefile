@@ -9,6 +9,7 @@ OBJS = $(SRCS:.c=.o)
 INCLUDES = -I.
 LDFLAGS = -shared
 CFLAGS = -fPIC -g -O2 -Wall -Wextra -Werror
+EXTRACCFLAGS = -Wformat -Wformat-security
 TARGET_LIB = librmonapi.so
 lib: build
 ifeq (,$(shell which ${CC}))

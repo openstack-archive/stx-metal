@@ -12,6 +12,7 @@ LDLIBS = -lstdc++ -ldaemon -lcommon -lfmcommon -lrmonapi -lrt -levent -lcrypto -
 INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -IrmonApi
 CCFLAGS = -g -O2 -Wall -Werror -Wextra
+EXTRACCFLAGS = -Wformat -Wformat-security
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)

@@ -45,7 +45,7 @@ OBJS = $(SRCS:.cpp=.o)
 LDLIBS += -lstdc++ -ldaemon -lcommon -lfmcommon -lrt -lpq -levent -ljson-c -lcrypto -luuid
 
 INCLUDES = -I. -I../daemon
-CCFLAGS = -g -O2 -Wall -Wextra -Werror -std=c++11
+CCFLAGS = -g -O2 -Wall -Wextra -Werror -std=c++11 -Wformat -Wformat-security
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
@@ -81,7 +81,7 @@ library:
 	ar rcs libhostUtil.a hostUtil.o $(EXTRAARFLAGS)
 
 testhead:
-	$(CCFLAGS) $(INCLUDES) -L../daemon -L../common -L. $(LDLIBS) -lpingUtil -lnodeBase -lregexUtil -lhostUtil 
+	$(CCFLAGS) $(INCLUDES) -L../daemon -L../common -L. $(LDLIBS) -lpingUtil -lnodeBase -lregexUtil -lhostUtil
 
 clean:
 	@rm -v -f *.o *.a

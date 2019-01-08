@@ -139,7 +139,7 @@ void _clear_thinmeta_alarm ( thinmeta_resource_config_type * ptr )
     _build_entity_instance_id (ptr, alarmData.entity_instance_id);
 
     snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, THINMETA_ALARM_ID);
-    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, alarmData.entity_instance_id);
+    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, "%s", alarmData.entity_instance_id);
 
     int ret = rmon_fm_clear(&alarmFilter);
     if (ret == FM_ERR_OK) {

@@ -4,16 +4,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-SRCS = rmon_resource_notify.cpp 
+SRCS = rmon_resource_notify.cpp
 OBJS = $(SRCS:.cpp=.o)
 LDLIBS = -lstdc++ -lrmonapi -lrt
 INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -I..
 CCFLAGS = -g -O2 -Wall -Wextra -Werror
+EXTRACCFLAGS = -Wformat -Wformat-security
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
- 
+
 all: build
 
 .cpp.o:
@@ -29,5 +30,5 @@ endif
 build: clean static_analysis $(OBJS)
 	$(CXX) $(CCFLAGS) $(OBJS) -L../../common -L../../daemon -L../rmonApi/ $(LDLIBS) -o rmon_resource_notify
 
-clean: 
+clean:
 	@rm -v -f $(OBJ) rmon_resource_notify *.o *.a

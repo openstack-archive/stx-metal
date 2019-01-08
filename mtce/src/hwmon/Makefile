@@ -23,10 +23,11 @@ SRCS += hwmonFsm.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 BIN = hwmond
-LDLIBS = -lstdc++ -ldaemon -lfmcommon -lcommon -lthreadUtil -lipmiUtil -lpthread -levent -ljson-c -lrt -lcrypto 
+LDLIBS = -lstdc++ -ldaemon -lfmcommon -lcommon -lthreadUtil -lipmiUtil -lpthread -levent -ljson-c -lrt -lcrypto
 INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -I../maintenance
 CCFLAGS = -g -O2 -Wall -Wextra -Werror -std=c++11 -pthread
+EXTRACCFLAGS = -Wformat -Wformat-security
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
@@ -57,4 +58,4 @@ clean_bins:
 	@rm -v -f $(BIN)
 
 clean:
-	@rm -v -f $(OBJS) $(BIN) 
+	@rm -v -f $(OBJS) $(BIN)

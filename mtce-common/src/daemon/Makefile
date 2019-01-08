@@ -6,12 +6,13 @@
 
 SHELL = /bin/bash
 
-SRCS = daemon_main.cpp daemon_ini.cpp daemon_debug.cpp daemon_signal.cpp daemon_config.cpp daemon_files.cpp 
+SRCS = daemon_main.cpp daemon_ini.cpp daemon_debug.cpp daemon_signal.cpp daemon_config.cpp daemon_files.cpp
 OBJS = daemon_main.o   daemon_ini.o   daemon_debug.o   daemon_signal.o   daemon_config.o   daemon_files.o
 
 OBJS = $(SRCS:.cpp=.o)
 INCLUDES = -I. -I../common
 CCFLAGS = -g -O2 -Wall -Wextra -Werror -DBUILDINFO="\"$$(date)\""
+CCFLAGS += -Wformat -Wformat-security
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)

@@ -705,7 +705,7 @@ void _set_resource_usage ( string reason_text, resource_config_type * ptr )
     temp_val = reason_text.substr(found+1);
     last_index = temp_val.find_first_not_of("0123456789");
     res_val = temp_val.substr(0, last_index);
-    snprintf (resource_usage, sizeof(resource_usage), res_val.c_str());
+    snprintf (resource_usage, sizeof(resource_usage), "%s", res_val.c_str());
     sscanf(resource_usage, "%lf", &ptr->resource_value);
 }
 
@@ -758,7 +758,7 @@ void build_entity_instance_id ( resource_config_type *ptr,  char *entity_instanc
     else
     {
         /* Use hostname for alarm */
-        snprintf(entity_instance_id, FM_MAX_BUFFER_LENGTH, _rmon_ctrl_ptr->my_hostname);
+        snprintf(entity_instance_id, FM_MAX_BUFFER_LENGTH, "%s", _rmon_ctrl_ptr->my_hostname);
     }
 
     dlog ("resource %s entity instance id: %s\n", ptr->resource, entity_instance_id);
@@ -893,8 +893,8 @@ void rmon_alarming_init ( resource_config_type * ptr )
 
     build_entity_instance_id (ptr, alarmData.entity_instance_id);
 
-    snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, ptr->alarm_id);
-    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, alarmData.entity_instance_id);
+    snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, "%s", ptr->alarm_id);
+    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, "%s", alarmData.entity_instance_id);
 
     if (fm_get_fault( &alarmFilter, active_alarm) == FM_ERR_OK) 
     {
@@ -970,11 +970,11 @@ void send_clear_msg ( int index )
 
     string err_res_name(resource_config[index].resource);
     _space_to_underscore(err_res_name);
-    snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, resource_config[index].alarm_id);
+    snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, "%s", resource_config[index].alarm_id);
 
     build_entity_instance_id (&resource_config[index], alarmData.entity_instance_id);
 
-    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, alarmData.entity_instance_id);
+    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, "%s", alarmData.entity_instance_id);
 
     /* Notify rmon clients of fault being cleared */
     snprintf(resource_config[index].errorMsg, sizeof(resource_config[index].errorMsg),
@@ -1098,7 +1098,7 @@ void read_fs_file ( vector<string> & dynamic_resources )
         }
         string str(map);
 
-        snprintf( buf, MAX_LEN, str.c_str());
+        snprintf( buf, MAX_LEN, "%s", str.c_str());
         /* free the mmapped memory */
         if (munmap(map, fileInfo.st_size) == -1)
         {
@@ -1234,8 +1234,8 @@ void clear_alarm_for_resource ( resource_config_type * ptr )
 
     build_entity_instance_id (ptr, alarmData.entity_instance_id);
 
-    snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, ptr->alarm_id);
-    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, alarmData.entity_instance_id);
+    snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, "%s", ptr->alarm_id);
+    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, "%s", alarmData.entity_instance_id);
 
     int ret = rmon_fm_clear(&alarmFilter);
     if (ret == FM_ERR_OK)
@@ -1382,7 +1382,7 @@ void process_static_fs_file()
         for(std::vector<string>::iterator it = mounts.begin(); it != mounts.end(); ++it) 
         {
             string str = *it;
-            snprintf(buf, MAX_LEN, str.c_str());
+            snprintf(buf, MAX_LEN, "%s", str.c_str());
             sscanf(buf, "%49s %49s %49s %d %d %d", resource, device, type, &absolute_thresholds[0], &absolute_thresholds[1], &absolute_thresholds[2]);
 
             if (!found) 
@@ -1989,7 +1989,7 @@ void set_alarm_defaults ( resource_config_type * ptr )
     alarmData.timestamp = 0; 
     alarmData.service_affecting = FM_FALSE;
     alarmData.suppression = FM_TRUE;     
-    snprintf(alarmData.alarm_id, FM_MAX_BUFFER_LENGTH, ptr->alarm_id);
+    snprintf(alarmData.alarm_id, FM_MAX_BUFFER_LENGTH, "%s", ptr->alarm_id);
 
 }
 
@@ -2274,11 +2274,11 @@ int resource_handler ( resource_config_type * ptr )
             {
                 if ((ptr->alarm_status == ALARM_ON) && (ptr->alarm_raised))
                 {
-                    snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, ptr->alarm_id);
+                    snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, "%s", ptr->alarm_id);
 
                     build_entity_instance_id (ptr, alarmData.entity_instance_id);
 
-                    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, alarmData.entity_instance_id);
+                    snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, "%s", alarmData.entity_instance_id);
                     ilog ("%s alarm clear\n", ptr->resource );
 
                     /* clear the alarm */
@@ -2942,7 +2942,7 @@ int add_dynamic_mem_resource ( int resource_index, int criticality_index,
         resource_config[i].socket_id         = socket_id;
 
         /* add the alarm id for the FM API per resource monitored */
-        snprintf(resource_config[i].alarm_id, FM_MAX_BUFFER_LENGTH, alarm_id);
+        snprintf(resource_config[i].alarm_id, FM_MAX_BUFFER_LENGTH, "%s", alarm_id);
 
         mem_log_resource ( &resource_config[i] );     
         i++;
@@ -3051,7 +3051,7 @@ void calculate_fs_usage ( resource_config_type * ptr )
                     // exclude percentage (%) sign
                     last_index = temp_val.find_first_not_of("0123456789");
                     res_val = temp_val.substr(0, last_index);
-                    snprintf(capacity, sizeof(capacity), res_val.c_str());
+                    snprintf(capacity, sizeof(capacity), "%s", res_val.c_str());
                     sscanf(capacity, "%lf", &cap_percent);
 
                     if (ptr->percent == PERCENT_USED)
@@ -4738,8 +4738,8 @@ void rmon_service (rmon_ctrl_type * ctrl_ptr)
                     if (!found)
                     {
                         /* the alarm did not match any current resources so let's clear it */
-                        snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, (active_alarms+i)->alarm_id );
-                        snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, (active_alarms+i)->entity_instance_id);
+                        snprintf(alarmFilter.alarm_id, FM_MAX_BUFFER_LENGTH, "%s", (active_alarms+i)->alarm_id );
+                        snprintf(alarmFilter.entity_instance_id, FM_MAX_BUFFER_LENGTH, "%s", (active_alarms+i)->entity_instance_id);
 
                         ilog ("Clearing stale alarm %s for entity instance id: %s", (active_alarms+i)->alarm_id, (active_alarms+i)->entity_instance_id);
 

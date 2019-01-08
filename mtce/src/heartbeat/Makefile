@@ -14,6 +14,7 @@ INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -I../common -I../alarm -I../maintenance -I../public
 
 CCFLAGS = -g -O2 -Wall -Wextra -Werror
+EXTRACCFLAGS = -Wformat -Wformat-security
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
@@ -41,7 +42,7 @@ common:
 
 agent: $(OBJS)
 	$(CXX) $(CCFLAGS) hbsAgent.o -L../alarm -L../public $(LDLIBS) -o hbsAgent
-	
+
 client: $(OBJS)
 	$(CXX) $(CCFLAGS) hbsClient.o -L../public $(LDLIBS) -o hbsClient
 
@@ -50,4 +51,3 @@ clean_bins:
 
 clean:
 	@rm -v -f $(OBJS) $(BINS) *.o *.a
-

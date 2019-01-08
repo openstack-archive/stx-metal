@@ -57,6 +57,7 @@ LDLIBS += -lstdc++ -ldaemon -lcommon -lthreadUtil -lipmiUtil -lfmcommon -lrmonap
 INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -I../common -I../alarm -I../heartbeat -I../hwmon -I../public -I../rmon/rmonApi
 CCFLAGS += -g -O2 -Wall -Wextra -Werror -Wno-missing-braces
+EXTRACCFLAGS = -Wformat -Wformat-security
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)

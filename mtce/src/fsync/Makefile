@@ -9,6 +9,7 @@ OBJS = $(SRCS:.c=.o)
 LDLIBS = -L.
 INCLUDES = -I.
 CCFLAGS = -g -O2 -Wall -Wextra -Werror
+EXTRACCFLAGS = -Wformat -Wformat-security
 
 all: build
 
@@ -18,6 +19,5 @@ all: build
 build: $(OBJS)
 	$(CC) $(OBJS) $(LDLIBS) -o fsync
 
-clean: 
+clean:
 	@rm -v -f $(OBJS) fsync
-

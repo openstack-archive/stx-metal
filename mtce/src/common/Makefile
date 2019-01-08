@@ -12,7 +12,7 @@ OBJS = $(SRCS:.cpp=.o)
 
 INCLUDES = -I. -I/usr/include/mtce-daemon -I/usr/include/mtce-common
 INCLUDES += -I../alarm -I../heartbeat -I../maintenance
-CCFLAGS = -g -O2 -Wall -Wextra -Werror -std=c++11
+CCFLAGS = -g -O2 -Wall -Wextra -Werror -std=c++11 -Wformat -Wformat-security
 
 STATIC_ANALYSIS_TOOL = cppcheck
 STATIC_ANALYSIS_TOOL_EXISTS = $(shell [[ -e `which $(STATIC_ANALYSIS_TOOL)` ]] && echo 1 || echo 0)
