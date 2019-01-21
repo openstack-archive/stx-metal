@@ -157,7 +157,7 @@ void hwmonHostClass::hwmon_fsm ( void )
                     {
                         wlog ( "%s bm password is empty ; learning and forcing reconnect\n", host_ptr->hostname.c_str());
                         host_ptr->ping_info.ok = false ;
-                        host_ptr->thread_extra_info.bm_pw = host_ptr->bm_pw = get_bm_password (hostBase.get_uuid(host_ptr->hostname).data());
+                        host_ptr->thread_extra_info.bm_pw = host_ptr->bm_pw;
                     }
                     else if ( host_ptr->accessible )
                     {

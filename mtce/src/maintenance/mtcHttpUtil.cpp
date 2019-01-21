@@ -69,6 +69,9 @@ extern void mtcInvApi_cfg_Handler     ( struct evhttp_request *req, void *arg );
 extern void mtcSmgrApi_Handler        ( struct evhttp_request *req, void *arg );
 extern void mtcVimApi_Handler         ( struct evhttp_request *req, void *arg );
 
+extern void mtcSecretApi_get_Handler  ( struct evhttp_request *req, void *arg );
+extern void mtcSecretApi_read_Handler ( struct evhttp_request *req, void *arg );
+
 void mtcHttpUtil_Handler              ( struct evhttp_request *req, void *arg );
 
 
@@ -680,6 +683,20 @@ int mtcHttpUtil_api_request ( libEvent & event )
             event.type = EVHTTP_REQ_PATCH  ;
         }
     }
+
+    else if ( event.request == BARBICAN_GET_SECRET )
+    {
+        event.timeout = HTTP_SECRET_TIMEOUT ;
+        event.type = EVHTTP_REQ_GET ;
+        handler = mtcSecretApi_get_Handler ;
+    }
+    else if ( event.request == BARBICAN_READ_SECRET )
+    {
+        event.timeout = HTTP_SECRET_TIMEOUT ;
+        event.type = EVHTTP_REQ_GET ;
+        handler = mtcSecretApi_read_Handler ;
+    }
+
     else
     {
         slog ("%s Unsupported Request (%d)\n", event.hostname.c_str(), event.request);
@@ -770,9 +787,18 @@ int mtcHttpUtil_api_request ( libEvent & event )
     hdrs.entry[hdr_entry].value = "application/json" ;
     hdr_entry++;
 
-    hdrs.entry[hdr_entry].key   = "Accept" ;
-    hdrs.entry[hdr_entry].value = "application/json" ;
-    hdr_entry++;
+    if ( event.request == BARBICAN_READ_SECRET )
+    {
+        hdrs.entry[hdr_entry].key   = "Accept" ;
+        hdrs.entry[hdr_entry].value = "application/octet-stream" ;
+        hdr_entry++;
+    }
+    else
+    {
+        hdrs.entry[hdr_entry].key   = "Accept" ;
+        hdrs.entry[hdr_entry].value = "application/json" ;
+        hdr_entry++;
+    }
 
     if (( event.request != KEYSTONE_TOKEN     ) &&
         ( event.request != VIM_HOST_DISABLED  ) &&
@@ -826,6 +852,7 @@ int mtcHttpUtil_api_request ( libEvent & event )
     }
     else
     {
+        jlog ("%s API Address : %s\n", event.hostname.c_str(), event.prefix_path.c_str());
         event.status = evhttp_make_request ( event.conn, event.req, event.type, event.token.url.data());
     }
     if ( event.status == PASS )

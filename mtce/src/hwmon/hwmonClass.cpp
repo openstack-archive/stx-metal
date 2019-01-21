@@ -485,9 +485,6 @@ void hwmonHostClass::clear_bm_assertions ( struct hwmonHostClass::hwmon_host * h
     hwmonAlarm_clear ( host_ptr->hostname, HWMON_ALARM_ID__SENSORCFG, "sensors", REASON_DEPROVISIONED );
 }
 
-
-
-
 int hwmonHostClass::set_bm_prov ( struct hwmonHostClass::hwmon_host * host_ptr, bool state )
 {
     int rc = FAIL_HOSTNAME_LOOKUP ;
@@ -510,7 +507,7 @@ int hwmonHostClass::set_bm_prov ( struct hwmonHostClass::hwmon_host * host_ptr, 
             host_ptr->ping_info.ip       = host_ptr->bm_ip ;
             host_ptr->ping_info.hostname = host_ptr->hostname ;
             ipmi_bmc_data_init ( host_ptr );
-            host_ptr->thread_extra_info.bm_pw = host_ptr->bm_pw = get_bm_password (hostBase.get_uuid(host_ptr->hostname).data());
+            host_ptr->thread_extra_info.bm_pw = host_ptr->bm_pw ;
             host_ptr->thread_extra_info.bm_ip = host_ptr->bm_ip ;
             host_ptr->thread_extra_info.bm_un = host_ptr->bm_un ;
         }

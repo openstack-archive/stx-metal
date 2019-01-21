@@ -66,7 +66,6 @@ typedef struct
     char* keystone_auth_project ; /**< =services                              */
     char* keystone_user_domain;   /**< = Default                              */
     char* keystone_project_domain; /**< = Default                             */
-    char* keyring_directory     ; /**< =/opt/platform/.keyring/<release>      */
 
     char* sysinv_mtc_inv_label  ; /**< =/v1/hosts/                            */
     int   sysinv_api_port       ; /**< =6385                                  */
@@ -74,6 +73,9 @@ typedef struct
 
     char* ceilometer_url        ; /**< ceilometer sensor sample database url  */
     int   ceilometer_port       ; /**< ceilometer REST API port number        */
+
+    char* barbican_api_host     ; /**< Barbican REST API host IP address      */
+    int   barbican_api_port     ; /**< Barbican REST API port number          */
 
     int   mtc_rx_mgmnt_port     ; /**< mtcClient listens mgmnt nwk cmd reqs   */
     int   mtc_rx_infra_port     ; /**< mtcClient listens infra nwk cmd reqs   */
