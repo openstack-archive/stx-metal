@@ -50,6 +50,7 @@ using namespace std;
 #define HTTP_KEYSTONE_GET_TIMEOUT  (10)
 #define HTTP_SMGR_TIMEOUT          (20)
 #define HTTP_VIM_TIMEOUT           (20)
+#define HTTP_SECRET_TIMEOUT        (5)
 
 #define SMGR_MAX_RETRIES    (3)
 
@@ -59,12 +60,14 @@ using namespace std;
 
 #define SMGR_EVENT_SIG     "smgrEvent"
 #define SYSINV_EVENT_SIG   "sysinvEvent"
+#define SECRET_EVENT_SIG   "secretEvent"
 
 #define KEYSTONE_SIG       "token"
 #define SENSOR_SIG         "sensor"
 #define SYSINV_SIG         "sysinv"
 #define SMGR_SIG           "smgr"
 #define VIM_SIG            "vim"
+#define SECRET_SIG         "secret"
 
 #define SYSINV_OPER__LOAD_HOST     "load host"
 #define SYSINV_OPER__UPDATE_TASK   "update task"
@@ -152,19 +155,22 @@ typedef enum {
     SMGR_HOST_LOCKED,
     SMGR_HOST_ENABLED,
     SMGR_HOST_DISABLED,
-    
+
     KEYSTONE_TOKEN,
     KEYSTONE_GET_TOKEN,
     KEYSTONE_GET_SERVICE_LIST,
     KEYSTONE_GET_ENDPOINT_LIST,
+
+    BARBICAN_GET_SECRET,
+    BARBICAN_READ_SECRET,
 
     SERVICE_LAST
 } libEvent_enum ;
 
 
 /** Local event control structure for REST API services
- * 
- *  Nova, Neutron, Keystone and Inventory
+ *
+ *  Nova, Neutron, Keystone, Barbican and Inventory
  *
  */
 struct libEvent
@@ -175,7 +181,7 @@ struct libEvent
     bool   mutex                  ; /**< single operation at a time  */
     bool   active                 ; /**< true if waiting on response */
     int    stuck                  ; /**< Count mutex active stuck state */
-    bool   blocking               ; /**< true if command is blocking */ 
+    bool   blocking               ; /**< true if command is blocking */
     bool   found                  ; /**< true if query was found     */
     int    timeout                ; /**< Request timeout             */
     int    count                  ; /**< retry recover counter       */
@@ -198,7 +204,7 @@ struct libEvent
 
     /** Service Specific Request Info */
     libEvent_enum       request   ; /**< Specify the request command */
-    keyToken_type       token     ; /**< Copy of the active token    */ 
+    keyToken_type       token     ; /**< Copy of the active token    */
     string service                ; /**< Service being executed      */
     string hostname               ; /**< Target hostname             */
     string uuid                   ; /**< The UUID for this request   */
@@ -216,12 +222,12 @@ struct libEvent
     string address                ; /**< http url address            */
     string payload                ; /**< the request's payload       */
     string user_agent             ; /**< set the User-Agent header   */
-    
+
     /** Result Info */
     int    status                 ; /**< Execution Status            */
     int    http_status            ; /**< raw http returned status    */
     int    exec_time_msec         ; /**< execution time in msec      */
-    node_inv_type        inv_info ; 
+    node_inv_type        inv_info ;
     size_t response_len           ; /**< the json response length    */
     string response               ; /**< the json response string    */
     string result                 ; /**< Command specific result str */
@@ -282,10 +288,10 @@ typedef struct
 
 void httpUtil_init ( void );
 
-int httpUtil_event_init ( libEvent * ptr , 
+int httpUtil_event_init ( libEvent * ptr ,
                             string   hostname,
-                            string   service, 
-                            string   ip, 
+                            string   service,
+                            string   ip,
                                int   port );
 
 /** Add payload to the HTTP message body. */
@@ -304,14 +310,14 @@ int httpUtil_connect ( libEvent & event );
 int httpUtil_request  ( libEvent & event,
                         void(*hdlr)(struct evhttp_request *, void *));
 
-/** Common REST API Request Utility */ 
+/** Common REST API Request Utility */
 int httpUtil_api_request ( libEvent & event );
 
-/** Common REST API Request Utility */ 
+/** Common REST API Request Utility */
 int httpUtil_request ( libEvent & event , bool block,
                           void(*hdlr)(struct evhttp_request *, void *));
 
-/** Common REST API Receive Utility for non-blocking requests */ 
+/** Common REST API Receive Utility for non-blocking requests */
 int httpUtil_receive ( libEvent & event );
 
 /** HTTP response status checker */
