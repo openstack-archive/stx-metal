@@ -56,6 +56,46 @@ typedef struct
     string adminURL; /**< path to the nova server.                        */
 } jsonUtil_auth_type ;
 
+#define MAX_JSON_SECRET_CONTENTS_NUM 7
+#define MTC_JSON_SECRET_LIST       "secrets"
+#define MTC_JSON_SECRET_TOTAL      "total"
+#define MTC_JSON_SECRET_PREVIOUS   "previous"
+#define MTC_JSON_SECRET_NEXT       "next"
+#define MTC_JSON_SECRET_ALGORITHM  "algorithm"
+#define MTC_JSON_SECRET_LENGTH     "bit_length"
+#define MTC_JSON_SECRET_CONTENT    "content_types"
+#define MTC_JSON_SECRET_CREATED    "created"
+#define MTC_JSON_SECRET_CREATOR    "creator_id"
+#define MTC_JSON_SECRET_EXPIRATION "expiration"
+#define MTC_JSON_SECRET_MODE       "mode"
+#define MTC_JSON_SECRET_NAME       "name"
+#define MTC_JSON_SECRET_REFERENCE  "secret_ref"
+#define MTC_JSON_SECRET_TYPE       "secret_type"
+#define MTC_JSON_SECRET_STATUS     "status"
+#define MTC_JSON_SECRET_UPDATED    "updated"
+
+typedef struct
+{
+    string type     ;
+    string encoding ;
+} content_type ;
+
+typedef struct
+{
+    string algorithm     ;
+    int    bit_length    ;
+    content_type contents[MAX_JSON_SECRET_CONTENTS_NUM];
+    string created       ;
+    string creator_id    ;
+    string expiration    ;
+    string mode          ;
+    string name          ;
+    string secret_ref    ;
+    string secret_type   ;
+    string status        ;
+    string updated       ;
+} jsonUtil_secret_type ;
+
 /** Module initialization interface. 
   */
 void jsonUtil_init  ( jsonUtil_info_type & info );
@@ -78,8 +118,10 @@ int jsonApi_auth_request ( string & hostname, string & payload );
 
 /** Parse through the authorization request's response json string 
   * and load the relavent information into the passed in structure */
- int jsonUtil_inv_load ( char * json_str_ptr,
-                            jsonUtil_info_type & info );
+int jsonUtil_inv_load ( char * json_str_ptr, jsonUtil_info_type & info );
+
+
+int jsonUtil_secret_load ( string & name, char * json_str_ptr, jsonUtil_secret_type & info );
 
 int jsonUtil_load_host ( char * json_str_ptr, node_inv_type & info );
 int jsonUtil_load_host_state ( char * json_str_ptr, node_inv_type & info );

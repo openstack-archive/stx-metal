@@ -5810,6 +5810,8 @@ int nodeLinkClass::bm_handler ( struct nodeLinkClass::node * node_ptr )
                 {
                     wlog ("%s bmc access lost\n", node_ptr->hostname.c_str());
 
+                    mtcSecretApi_read_secret ( node_ptr );
+
                     /* remove the mc info file in case there is a firmware
                      * upgrade in progress. hwmond reads it and get
                      * the bmc fw version from it */
@@ -5842,6 +5844,7 @@ int nodeLinkClass::bm_handler ( struct nodeLinkClass::node * node_ptr )
                      ( mtcTimer_expired (node_ptr->bm_timer ) == true ))
                 {
                     int rc = PASS ;
+
                     if (( node_ptr->mc_info_query_active == false ) &&
                         ( node_ptr->mc_info_query_done   == false ))
                     {
@@ -5968,7 +5971,7 @@ int nodeLinkClass::bm_handler ( struct nodeLinkClass::node * node_ptr )
                                     node_ptr->power_status_query_done   = true  ;
                                     node_ptr->ipmitool_thread_ctrl.done = true  ;
                                     node_ptr->ipmitool_thread_info.command = 0  ;
-                                node_ptr->bm_accessible = true ;
+                                    node_ptr->bm_accessible = true ;
                                     node_ptr->bm_accessible = true ;
                                     mtcTimer_reset ( node_ptr->bmc_access_timer );
 
@@ -5999,6 +6002,7 @@ int nodeLinkClass::bm_handler ( struct nodeLinkClass::node * node_ptr )
                     /* Auto correct key ping information ; should ever occur but if it does ... */
                     if (( node_ptr->bm_ping_info.hostname.empty()) || ( node_ptr->bm_ping_info.ip.empty()))
                     {
+                        mtcSecretApi_get_secret ( node_ptr );
                         /* if the bm ip is not yet learned then this log will flood */
                         //slog ("%s host ping info missing ; (%d:%d)\n",
                         //          node_ptr->hostname.c_str(),
@@ -6022,6 +6026,8 @@ int nodeLinkClass::bm_handler ( struct nodeLinkClass::node * node_ptr )
                     node_ptr->bm_ping_info.ok = false ;
 
                     node_ptr->bm_ping_info.stage = PINGUTIL_MONITOR_STAGE__FAIL ;
+
+                    mtcSecretApi_read_secret ( node_ptr );
 
                     /* start a timer that will raise the BM Access alarm
                      * if we are not accessible by the time it expires */
@@ -6269,6 +6275,8 @@ int nodeLinkClass::insv_test_handler ( struct nodeLinkClass::node * node_ptr )
             if (( daemon_want_fit ( FIT_CODE__DO_NOTHING_THREAD, node_ptr->hostname )) ||
                 ( daemon_want_fit ( FIT_CODE__STRESS_THREAD , node_ptr->hostname )))
             {
+                 mtcSecretApi_get_secret ( node_ptr );
+
                  node_ptr->ipmitool_thread_ctrl.stage = THREAD_STAGE__IGNORE ;
                  node_ptr->ipmitool_thread_ctrl.id = true ;
                  node_ptr->ipmitool_thread_info.id = true ;

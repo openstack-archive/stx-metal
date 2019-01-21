@@ -227,6 +227,19 @@ int nodeLinkClass::mtcSmgrApi_request ( struct nodeLinkClass::node * node_ptr, m
 }
 
 
+int nodeLinkClass::mtcSecretApi_get_secret ( struct nodeLinkClass::node * node_ptr )
+{
+    UNUSED(node_ptr);
+    return(PASS);
+}
+
+int nodeLinkClass::mtcSecretApi_read_secret ( struct nodeLinkClass::node * node_ptr )
+{
+    UNUSED(node_ptr);
+    return(PASS);
+}
+
+
 void mtcTimer_handler ( int sig, siginfo_t *si, void *uc)
 {
     UNUSED(sig);

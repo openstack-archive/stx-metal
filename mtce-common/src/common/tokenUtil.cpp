@@ -833,11 +833,6 @@ int keystone_config_handler ( void * user,
             }
         }
     }
-    else if (MATCH("agent", "keyring_directory"))
-    {
-	    config_ptr->keyring_directory = strdup(value);
-        ilog("Keyring Directory : %s\n", config_ptr->keyring_directory );
-    }
     else if (MATCH("agent", "keystone_auth_username"))
     {
 	    config_ptr->keystone_auth_username = strdup(value);

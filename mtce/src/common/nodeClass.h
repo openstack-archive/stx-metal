@@ -36,6 +36,7 @@ using namespace std;
 #include "ipmiUtil.h"     /* for ... mc_info_type                     */
 #include "mtcHttpUtil.h"  /* for ... libevent stuff                   */
 #include "mtcSmgrApi.h"   /*                                          */
+#include "mtcSecretApi.h" /*                                          */
 #include "alarmUtil.h"    /* for ... SFmAlarmDataT                    */
 #include "mtcAlarm.h"     /* for ... MTC_ALARM_ID__xx and utils       */
 #include "mtcThreads.h"   /* for ... mtcThread_ipmitool               */
@@ -455,8 +456,9 @@ private:
           * based on each service */
 
         libEvent sysinvEvent; /**< Sysinv REST API Handling for host */
-        libEvent    cfgEvent; /**< Sysinv REST API Handling for config changes */
+        libEvent cfgEvent   ; /**< Sysinv REST API Handling for config changes */
         libEvent vimEvent   ; /**< VIM Event REST API Handling       */
+        libEvent secretEvent; /**< Barbican REST API Handling         */
 
         libEvent httpReq    ; /**< Http libEvent Request Handling    */
         libEvent thisReq    ; /**< Http libEvent Request Handling    */
@@ -570,6 +572,9 @@ private:
 
         /** The IP address of the host's board management controller */
         string bm_ip ;
+
+        /** The password reference of the host's board management controller */
+        string bm_pw_ref ;
 
         /** The password of the host's board management controller */
         string bm_pw ;
@@ -1110,7 +1115,11 @@ private:
     int mtcSmgrApi_request          ( struct nodeLinkClass::node * node_ptr, mtc_cmd_enum operation, int retries );
 
     /* Private VIM API */
-    int  mtcVimApi_state_change     ( struct nodeLinkClass::node * node_ptr, libEvent_enum operation, int retries );
+    int mtcVimApi_state_change      ( struct nodeLinkClass::node * node_ptr, libEvent_enum operation, int retries );
+
+    /* Private Barbican API */
+    int mtcSecretApi_get_secret     ( struct nodeLinkClass::node * node_ptr );
+    int mtcSecretApi_read_secret    ( struct nodeLinkClass::node * node_ptr );
 
     int  set_bm_prov ( struct nodeLinkClass::node * node_ptr, bool state );
 
@@ -1924,13 +1933,13 @@ public:
 
     void mtcSmgrApi_handler    ( struct evhttp_request *req, void *arg );
 
+    int mtcSecretApi_get_secret  ( string & hostname );
+    int mtcSecretApi_read_secret ( string & hostname );
+
+    void mtcSecretApi_get_handler  ( struct evhttp_request *req, void *arg );
+    void mtcSecretApi_read_handler ( struct evhttp_request *req, void *arg );
+
     void mtcHttpUtil_handler   ( struct evhttp_request *req, void *arg );
-
-    /* Update the authentication token as a work queue'd command */
-    int mtcKeyApi_refresh_token ( string hostname );
-
-    /* Update the authentication token now ; as a blocking request */
-    int mtcKeyApi_get_token     ( string hostname );
 
     /*********************** Public Heartbeat Interfaces *********************/
 

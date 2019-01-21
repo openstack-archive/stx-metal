@@ -77,7 +77,6 @@ int set_host_functions ( string         nodetype_str,
 
 bool is_goenabled ( int nodeType, bool pass );
 
-string get_bm_password ( const char * username );
 string get_strings_in_string_list ( std::list<string> & l );
 bool is_string_in_string_list ( std::list<string> & l , string & str );
 bool is_int_in_int_list ( std::list<int> & l , int & val );

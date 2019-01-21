@@ -29,6 +29,7 @@ using namespace std;
 #include "nodeClass.h"
 #include "nodeUtil.h"
 #include "mtcNodeMsg.h"    /* for ... send_mtc_cmd         */
+#include "mtcSecretApi.h"
 #include "nlEvent.h"       /* for ... get_netlink_events   */
 #include "daemon_common.h"
 
@@ -632,6 +633,7 @@ nodeLinkClass::node* nodeLinkClass::addNode( string hostname )
     ptr->bm_ip = NONE ;
     ptr->bm_type = NONE ;
     ptr->bm_un = NONE ;
+    ptr->bm_pw_ref = NONE ;
     ptr->bm_pw = NONE ;
 
     ptr->bm_provisioned = false ; /* assume not provisioned until learned   */
@@ -649,6 +651,7 @@ nodeLinkClass::node* nodeLinkClass::addNode( string hostname )
     ptr->cfgEvent.base   = NULL ;
     ptr->sysinvEvent.base= NULL ;
     ptr->vimEvent.base   = NULL ;
+    ptr->secretEvent.base= NULL ;
 
     ptr->httpReq.base    = NULL ;
     ptr->libEvent_done_fifo.clear();
@@ -663,17 +666,19 @@ nodeLinkClass::node* nodeLinkClass::addNode( string hostname )
     ptr->cfgEvent.conn   = NULL ;
     ptr->sysinvEvent.conn= NULL ;
     ptr->vimEvent.conn   = NULL ;
+    ptr->secretEvent.conn= NULL ;
     ptr->httpReq.conn    = NULL ;
 
     ptr->cfgEvent.req    = NULL ;
     ptr->sysinvEvent.req = NULL ;
     ptr->vimEvent.req    = NULL ;
+    ptr->secretEvent.req = NULL ;
     ptr->httpReq.req     = NULL ;
-
 
     ptr->cfgEvent.buf    = NULL ;
     ptr->sysinvEvent.buf = NULL ;
     ptr->vimEvent.buf    = NULL ;
+    ptr->secretEvent.buf = NULL ;
     ptr->httpReq.buf     = NULL ;
 
     /* log throttles */
@@ -834,6 +839,17 @@ struct nodeLinkClass::node* nodeLinkClass::getEventBaseNode ( libEvent_enum requ
                {
                    hlog1 ("%s Found vimEvent Base Pointer (%p) \n",
                              ptr->hostname.c_str(), ptr->vimEvent.base);
+
+                   return ptr ;
+               }
+           }
+           case BARBICAN_GET_SECRET:
+           case BARBICAN_READ_SECRET:
+           {
+               if ( ptr->secretEvent.base ==  base_ptr )
+               {
+                   hlog1 ("%s Found Barbican Event Base Pointer (%p)\n",
+                             ptr->hostname.c_str(), ptr->secretEvent.base);
 
                    return ptr ;
                }
@@ -2428,9 +2444,11 @@ int nodeLinkClass::mod_host ( node_inv_type & inv )
             /* BM is already provisioned but is now deprovisioned */
             else if (( bm_type_was_valid == true ) && ( bm_type_now_valid == false ))
             {
-                node_ptr->bm_type = NONE ;
-                node_ptr->bm_ip   = NONE ;
-                node_ptr->bm_un   = NONE ;
+                node_ptr->bm_type   = NONE ;
+                node_ptr->bm_ip     = NONE ;
+                node_ptr->bm_un     = NONE ;
+                node_ptr->bm_pw_ref = NONE ;
+                node_ptr->bm_pw     = NONE ;
                 mtcAlarm_log ( node_ptr->hostname, MTC_LOG_ID__COMMAND_BM_DEPROVISIONED );
                 set_bm_prov ( node_ptr, false );
             }
@@ -2684,6 +2702,8 @@ int nodeLinkClass::add_host ( node_inv_type & inv )
         {
             bool validStates = false ;
             node_ptr->hostname    = inv.name ;
+
+            mtcSecretApi_get_secret( node_ptr );
 
             /* set the node type ; string and define code */
             node_ptr->type        = inv.type ;
@@ -3942,6 +3962,8 @@ int nodeLinkClass::set_bm_prov ( struct nodeLinkClass::node * node_ptr, bool sta
         /* Clear the alarm if we are starting fresh from an unprovisioned state */
         if (( node_ptr->bm_provisioned == false ) && ( state == true ))
         {
+            mtcSecretApi_read_secret( node_ptr );
+
             /* BMC is managed by IPMI/IPMITOOL */
             ilog ("%s starting BM ping monitor to address '%s'\n",
                       node_ptr->hostname.c_str(),
@@ -3953,10 +3975,7 @@ int nodeLinkClass::set_bm_prov ( struct nodeLinkClass::node * node_ptr, bool sta
             bmc_access_data_init ( node_ptr );
             node_ptr->bm_ping_info.timer_handler = &mtcTimer_handler ;
 
-            node_ptr->thread_extra_info.bm_pw =
-            node_ptr->bm_pw =
-            get_bm_password (node_ptr->uuid.data());
-
+            node_ptr->thread_extra_info.bm_pw = node_ptr->bm_pw ;
             node_ptr->thread_extra_info.bm_ip = node_ptr->bm_ip ;
             node_ptr->thread_extra_info.bm_un = node_ptr->bm_un ;
 

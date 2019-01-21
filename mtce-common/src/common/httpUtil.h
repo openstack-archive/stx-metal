@@ -50,6 +50,7 @@ using namespace std;
 #define HTTP_KEYSTONE_GET_TIMEOUT  (10)
 #define HTTP_SMGR_TIMEOUT          (20)
 #define HTTP_VIM_TIMEOUT           (20)
+#define HTTP_SECRET_TIMEOUT        (20)
 
 #define SMGR_MAX_RETRIES    (3)
 
@@ -59,12 +60,14 @@ using namespace std;
 
 #define SMGR_EVENT_SIG     "smgrEvent"
 #define SYSINV_EVENT_SIG   "sysinvEvent"
+#define SECRET_EVENT_SIG   "secretEvent"
 
 #define KEYSTONE_SIG       "token"
 #define SENSOR_SIG         "sensor"
 #define SYSINV_SIG         "sysinv"
 #define SMGR_SIG           "smgr"
 #define VIM_SIG            "vim"
+#define SECRET_SIG         "secret"
 
 #define SYSINV_OPER__LOAD_HOST     "load host"
 #define SYSINV_OPER__UPDATE_TASK   "update task"
@@ -158,13 +161,16 @@ typedef enum {
     KEYSTONE_GET_SERVICE_LIST,
     KEYSTONE_GET_ENDPOINT_LIST,
 
+    BARBICAN_GET_SECRET,
+    BARBICAN_READ_SECRET,
+
     SERVICE_LAST
 } libEvent_enum ;
 
 
 /** Local event control structure for REST API services
  * 
- *  Nova, Neutron, Keystone and Inventory
+ *  Nova, Neutron, Keystone, Barbican and Inventory
  *
  */
 struct libEvent
