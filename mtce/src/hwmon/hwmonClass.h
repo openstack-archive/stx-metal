@@ -49,6 +49,8 @@ class hwmonHostClass
 
         bool bm_provisioned ;
 
+        libEvent secretEvent ;
+
         /** set true once a connection is estabished and
          *  set false when error recovery is performed on the connection
          **/
@@ -97,6 +99,7 @@ class hwmonHostClass
 
         struct mtc_timer hostTimer    ;
         struct mtc_timer addTimer     ;
+        struct mtc_timer secretTimer  ;
 
         bool monitor ; /* true if host's sensors are to be monitored */
 

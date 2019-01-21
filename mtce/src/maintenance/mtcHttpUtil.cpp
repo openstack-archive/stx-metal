@@ -680,6 +680,7 @@ int mtcHttpUtil_api_request ( libEvent & event )
             event.type = EVHTTP_REQ_PATCH  ;
         }
     }
+
     else
     {
         slog ("%s Unsupported Request (%d)\n", event.hostname.c_str(), event.request);
@@ -770,9 +771,18 @@ int mtcHttpUtil_api_request ( libEvent & event )
     hdrs.entry[hdr_entry].value = "application/json" ;
     hdr_entry++;
 
-    hdrs.entry[hdr_entry].key   = "Accept" ;
-    hdrs.entry[hdr_entry].value = "application/json" ;
-    hdr_entry++;
+    if ( event.request == BARBICAN_READ_SECRET )
+    {
+        hdrs.entry[hdr_entry].key   = "Accept" ;
+        hdrs.entry[hdr_entry].value = "application/octet-stream" ;
+        hdr_entry++;
+    }
+    else
+    {
+        hdrs.entry[hdr_entry].key   = "Accept" ;
+        hdrs.entry[hdr_entry].value = "application/json" ;
+        hdr_entry++;
+    }
 
     if (( event.request != KEYSTONE_TOKEN     ) &&
         ( event.request != VIM_HOST_DISABLED  ) &&
@@ -826,6 +836,7 @@ int mtcHttpUtil_api_request ( libEvent & event )
     }
     else
     {
+        jlog ("%s API Address : %s\n", event.hostname.c_str(), event.token.url.c_str());
         event.status = evhttp_make_request ( event.conn, event.req, event.type, event.token.url.data());
     }
     if ( event.status == PASS )

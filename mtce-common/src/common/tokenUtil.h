@@ -31,8 +31,6 @@ using namespace std;
 
 #define MTC_POST_KEY_LABEL "/v3/auth/tokens"
 
-#define KEYSTONE_SIG       "token"
-
 /* The invalidation window is 5 minutes according
  * to the testing of token expiration time */
 #define STALE_TOKEN_DURATION 300 //5 minutes

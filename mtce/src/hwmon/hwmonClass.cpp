@@ -7,6 +7,7 @@
 
 #include "nodeBase.h"
 #include "tokenUtil.h"
+#include "secretUtil.h"
 #include "hwmonClass.h"
 #include "hwmonUtil.h"
 #include "hwmonIpmi.h"
@@ -128,6 +129,7 @@ struct hwmonHostClass::hwmon_host* hwmonHostClass::addHost( string hostname )
     ptr->ping_info.timer_handler = &hwmonTimer_handler ;
     mtcTimer_init ( ptr->hostTimer,          ptr->hostname, "host timer" );
     mtcTimer_init ( ptr->addTimer,           ptr->hostname, "add timer"  );
+    mtcTimer_init ( ptr->secretTimer,        ptr->hostname, "secret timer" );
     mtcTimer_init ( ptr->relearnTimer,       ptr->hostname, "relearn timer" );
 
     mtcTimer_init ( ptr->ping_info.timer,    ptr->hostname, "ping monitor timer" );
@@ -143,6 +145,11 @@ struct hwmonHostClass::hwmon_host* hwmonHostClass::addHost( string hostname )
     ptr->event.conn = NULL ;
     ptr->event.req = NULL ;
     ptr->event.buf = NULL ;
+
+    ptr->secretEvent.base= NULL ;
+    ptr->secretEvent.conn= NULL ;
+    ptr->secretEvent.req = NULL ;
+    ptr->secretEvent.buf = NULL ;
 
     /* If the host list is empty add it to the head */
     if( hwmon_head == NULL )
@@ -180,6 +187,7 @@ void hwmonHostClass::free_host_timers ( struct hwmon_host * ptr )
 {
     mtcTimer_fini ( ptr->hostTimer );
     mtcTimer_fini ( ptr->addTimer );
+    mtcTimer_fini ( ptr->secretTimer );
     mtcTimer_fini ( ptr->relearnTimer );
     mtcTimer_fini ( ptr->ping_info.timer );
 
@@ -485,9 +493,6 @@ void hwmonHostClass::clear_bm_assertions ( struct hwmonHostClass::hwmon_host * h
     hwmonAlarm_clear ( host_ptr->hostname, HWMON_ALARM_ID__SENSORCFG, "sensors", REASON_DEPROVISIONED );
 }
 
-
-
-
 int hwmonHostClass::set_bm_prov ( struct hwmonHostClass::hwmon_host * host_ptr, bool state )
 {
     int rc = FAIL_HOSTNAME_LOOKUP ;
@@ -510,7 +515,17 @@ int hwmonHostClass::set_bm_prov ( struct hwmonHostClass::hwmon_host * host_ptr, 
             host_ptr->ping_info.ip       = host_ptr->bm_ip ;
             host_ptr->ping_info.hostname = host_ptr->hostname ;
             ipmi_bmc_data_init ( host_ptr );
-            host_ptr->thread_extra_info.bm_pw = host_ptr->bm_pw = get_bm_password (hostBase.get_uuid(host_ptr->hostname).data());
+
+            string host_uuid = hostBase.get_uuid( host_ptr->hostname );
+            barbicanSecret_type * secret = secretUtil_find_secret( host_uuid );
+            if ( secret )
+            {
+                secret->reference.clear() ;
+                secret->payload.clear() ;
+                secret->stage = MTC_SECRET__START ;
+            }
+
+            host_ptr->thread_extra_info.bm_pw = host_ptr->bm_pw ;
             host_ptr->thread_extra_info.bm_ip = host_ptr->bm_ip ;
             host_ptr->thread_extra_info.bm_un = host_ptr->bm_un ;
         }
@@ -1010,6 +1025,10 @@ struct hwmonHostClass::hwmon_host * hwmonHostClass::getHost_timer ( timer_t tid 
                return host_ptr ;
            }
            if ( host_ptr->hostTimer.tid == tid )
+           {
+               return host_ptr ;
+           }
+           if ( host_ptr->secretTimer.tid == tid )
            {
                return host_ptr ;
            }

@@ -554,7 +554,6 @@ void httpUtil_handler ( struct evhttp_request *req, void *arg )
                   event_ptr->status);
         if ( event_ptr->type != EVHTTP_REQ_POST )
             event_ptr->status = PASS ;
-
         goto httpUtil_handler_done ;
     }
 
@@ -788,6 +787,11 @@ int httpUtil_api_request ( libEvent & event )
     {
         ;
     }
+    else if (( event.request == BARBICAN_GET_SECRET ) ||
+             ( event.request == BARBICAN_READ_SECRET  ))
+    {
+        ;
+    }
     else
     {
         slog ("%s Unsupported Request (%d)\n", event.hostname.c_str(), event.request);
@@ -864,9 +868,18 @@ int httpUtil_api_request ( libEvent & event )
     hdrs.entry[hdr_entry].value = "application/json" ;
     hdr_entry++;
 
-    hdrs.entry[hdr_entry].key   = "Accept" ;
-    hdrs.entry[hdr_entry].value = "application/json" ;
-    hdr_entry++;
+    if ( event.request == BARBICAN_READ_SECRET )
+    {
+        hdrs.entry[hdr_entry].key   = "Accept" ;
+        hdrs.entry[hdr_entry].value = "application/octet-stream" ;
+        hdr_entry++;
+    }
+    else
+    {
+        hdrs.entry[hdr_entry].key   = "Accept" ;
+        hdrs.entry[hdr_entry].value = "application/json" ;
+        hdr_entry++;
+    }
 
     if ( event.request != KEYSTONE_GET_TOKEN )
     {
@@ -912,8 +925,10 @@ int httpUtil_api_request ( libEvent & event )
     }
     else
     {
+        hlog ("%s API Internal Address : %s\n", event.hostname.c_str(), event.address.c_str());
         event.status = evhttp_make_request ( event.conn, event.req, event.type, event.address.data());
     }
+
     daemon_signal_hdlr ();
     if ( event.status == PASS )
     {
@@ -939,14 +954,15 @@ int httpUtil_api_request ( libEvent & event )
             httpUtil_latency_log ( event, label.c_str(), __LINE__, MAX_DELAY_B4_LATENCY_LOG );
             goto httpUtil_api_request_done ;
         }
-        else if ( event.request == KEYSTONE_GET_TOKEN )
+        else if ( event.request == KEYSTONE_GET_TOKEN ||
+                  event.request == BARBICAN_GET_SECRET ||
+                  event.request == BARBICAN_READ_SECRET )
         {
             hlog ("%s Requested (non-blocking) (timeout:%d secs)\n", event.log_prefix.c_str(), event.timeout);
             event.active = true ;
             event.status = event_base_loop(event.base, EVLOOP_NONBLOCK);
             httpUtil_latency_log ( event, label.c_str(), __LINE__, MAX_DELAY_B4_LATENCY_LOG ); /* Should be immediate ; non blocking */
             return (event.status);
-            // goto httpUtil_api_request_done ;
         }
         else
         {
