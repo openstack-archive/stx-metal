@@ -1,0 +1,9 @@
+Code-Review+2: John Kung <john.kung@windriver.com>
+Code-Review+2: Tao Liu <tao.liu@windriver.com>
+Workflow+1: Tao Liu <tao.liu@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 25 Jan 2019 22:25:37 +0000
+Reviewed-on: https://review.openstack.org/633198
+Project: openstack/stx-metal
+Branch: refs/heads/master
