@@ -9,32 +9,32 @@ URL: unknown
 
 Source0: LICENSE
 
-Source001: vmlinuz
-Source002: initrd.img
-Source003: squashfs.img
+Source1: vmlinuz
+Source2: initrd.img
+Source3: squashfs.img
 
-Source010: pxeboot-update.sh
-Source011: grub.cfg
-Source012: efiboot.img
-Source013: post_clone_iso_ks.cfg
+Source10: pxeboot-update.sh
+Source11: grub.cfg
+Source12: efiboot.img
+Source13: post_clone_iso_ks.cfg
 
-Source030: default
-Source031: default.static
-Source032: centos-pxe-controller-install
-Source033: centos-pxe-worker-install
-Source034: centos-pxe-smallsystem-install
-Source035: centos-pxe-storage-install
-Source036: centos-pxe-worker_lowlatency-install
-Source037: centos-pxe-smallsystem_lowlatency-install
+Source30: default
+Source31: default.static
+Source32: centos-pxe-controller-install
+Source33: centos-pxe-worker-install
+Source34: centos-pxe-smallsystem-install
+Source35: centos-pxe-storage-install
+Source36: centos-pxe-worker_lowlatency-install
+Source37: centos-pxe-smallsystem_lowlatency-install
 
-Source050: pxe-grub.cfg
-Source051: pxe-grub.cfg.static
-Source052: efi-centos-pxe-controller-install
-Source053: efi-centos-pxe-worker-install
-Source054: efi-centos-pxe-smallsystem-install
-Source055: efi-centos-pxe-storage-install
-Source056: efi-centos-pxe-worker_lowlatency-install
-Source057: efi-centos-pxe-smallsystem_lowlatency-install
+Source50: pxe-grub.cfg
+Source51: pxe-grub.cfg.static
+Source52: efi-centos-pxe-controller-install
+Source53: efi-centos-pxe-worker-install
+Source54: efi-centos-pxe-smallsystem-install
+Source55: efi-centos-pxe-storage-install
+Source56: efi-centos-pxe-worker_lowlatency-install
+Source57: efi-centos-pxe-smallsystem_lowlatency-install
 
 
 BuildRequires: syslinux
@@ -57,60 +57,60 @@ install -v -d -m 755 %{buildroot}/pxeboot/EFI
 install -v -d -m 755 %{buildroot}/pxeboot/EFI/centos
 ln -s %{_prefix}/lib/grub/x86_64-efi %{buildroot}/pxeboot/EFI/centos/x86_64-efi
 
-install -v -m 644 %{_sourcedir}/vmlinuz \
+install -v -m 644 %{SOURCE1} \
     %{buildroot}/pxeboot/rel-%{platform_release}/installer-bzImage_1.0
-install -v -m 644 %{_sourcedir}/initrd.img \
+install -v -m 644 %{SOURCE2} \
     %{buildroot}/pxeboot/rel-%{platform_release}/installer-intel-x86-64-initrd_1.0
 ln -s installer-bzImage_1.0 %{buildroot}/pxeboot/rel-%{platform_release}/installer-bzImage
 ln -s installer-intel-x86-64-initrd_1.0 %{buildroot}/pxeboot/rel-%{platform_release}/installer-initrd
 
-install -v -D -m 644 %{_sourcedir}/squashfs.img \
+install -v -D -m 644 %{SOURCE3} \
     %{buildroot}/www/pages/feed/rel-%{platform_release}/LiveOS/squashfs.img
 
 install -v -d -m 755 %{buildroot}%{_sbindir}
 
-install -v -m 755 %{_sourcedir}/pxeboot-update.sh %{buildroot}%{_sbindir}/pxeboot-update-%{platform_release}.sh
+install -v -m 755 %{SOURCE10} %{buildroot}%{_sbindir}/pxeboot-update-%{platform_release}.sh
 
-install -v -m 644 %{_sourcedir}/post_clone_iso_ks.cfg \
+install -v -m 644 %{SOURCE13} \
     %{buildroot}/pxeboot/post_clone_iso_ks.cfg
 
-install -v -m 644 %{_sourcedir}/default \
+install -v -m 644 %{SOURCE30} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/default
-install -v -m 644 %{_sourcedir}/default.static \
+install -v -m 644 %{SOURCE31} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/default.static
-install -v -m 644 %{_sourcedir}/centos-pxe-controller-install \
+install -v -m 644 %{SOURCE32} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/pxe-controller-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/centos-pxe-worker-install \
+install -v -m 644 %{SOURCE33} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/pxe-worker-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/centos-pxe-smallsystem-install \
+install -v -m 644 %{SOURCE34} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/pxe-smallsystem-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/centos-pxe-storage-install \
+install -v -m 644 %{SOURCE35} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/pxe-storage-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/centos-pxe-worker_lowlatency-install \
+install -v -m 644 %{SOURCE36} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/pxe-worker_lowlatency-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/centos-pxe-smallsystem_lowlatency-install \
+install -v -m 644 %{SOURCE37} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/pxe-smallsystem_lowlatency-install-%{platform_release}
 
 
 # UEFI support
-install -v -m 644 %{_sourcedir}/pxe-grub.cfg \
+install -v -m 644 %{SOURCE50} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/grub.cfg
-install -v -m 644 %{_sourcedir}/pxe-grub.cfg.static \
+install -v -m 644 %{SOURCE51} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/grub.cfg.static
 # Copy EFI boot image. It will be used to create ISO on the Controller.
-install -v -m 644 %{_sourcedir}/efiboot.img \
+install -v -m 644 %{SOURCE12} \
     %{buildroot}/pxeboot/rel-%{platform_release}/
-install -v -m 644 %{_sourcedir}/efi-centos-pxe-controller-install \
+install -v -m 644 %{SOURCE52} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/efi-pxe-controller-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/efi-centos-pxe-worker-install \
+install -v -m 644 %{SOURCE53} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/efi-pxe-worker-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/efi-centos-pxe-smallsystem-install \
+install -v -m 644 %{SOURCE54} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/efi-pxe-smallsystem-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/efi-centos-pxe-storage-install \
+install -v -m 644 %{SOURCE55} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/efi-pxe-storage-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/efi-centos-pxe-worker_lowlatency-install \
+install -v -m 644 %{SOURCE56} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/efi-pxe-worker_lowlatency-install-%{platform_release}
-install -v -m 644 %{_sourcedir}/efi-centos-pxe-smallsystem_lowlatency-install \
+install -v -m 644 %{SOURCE57} \
     %{buildroot}/pxeboot/pxelinux.cfg.files/efi-pxe-smallsystem_lowlatency-install-%{platform_release}
 
 
@@ -131,7 +131,7 @@ install -v -m 0644 \
     %{buildroot}/pxeboot
 
 # Copy Titanium grub.cfg. It will be used to create ISO on the Controller.
-install -v -m 0644 %{_sourcedir}/grub.cfg \
+install -v -m 0644 %{SOURCE11} \
     %{buildroot}/pxeboot/EFI/
 
 # UEFI bootloader expect the grub.cfg file to be in /pxeboot/ so create a symlink for it
