@@ -48,17 +48,6 @@ SW_VERSION=18.10
 # Functions
 # ---------
 
-function uninstall_files() {
-    local dest_dir=$1
-    local dest_file_array=($2)
-    local file=""
-
-    for (( i=0; i<${#dest_file_array[*]}; i++ )); do
-        file=${dest_file_array[$i]##*/}
-        sudo rm -rf $dest_dir/$file
-    done
-}
-
 function install_mtce_common {
     local x version
 
@@ -388,6 +377,16 @@ function install_maintenance {
     # components could be seperatly installed if
     # installation is well controlled in Makefile
     install_mtce
+
+    if is_service_enabled mtce-compute; then
+        install_mtce_compute
+    fi
+    if is_service_enabled mtce-control; then
+        install_mtce_control
+    fi
+    if is_service_enabled mtce-storage; then
+        install_mtce_storage
+    fi
 }
 
 function configure_maintenance {
@@ -452,7 +451,6 @@ function configure_maintenance {
 }
 
 function start_mtcAgent {
-    echo "trigger start mtc agent service"
     # add admin compute endpoint
     if is_service_enabled nova; then
         source openrc admin admin
@@ -470,8 +468,6 @@ function start_mtcAgent {
 }
 
 function start_hbsAgent {
-    echo "trigger start hbs agent service"
-
     # copy hbsAgent.service template to devstack
     sudo cp ${PREFIX}/lib/systemd/system/hbsAgent.service \
         ${SYSCONFDIR}/systemd/system/devstack@hbsAgent.service
@@ -479,7 +475,6 @@ function start_hbsAgent {
 }
 
 function start_hwmon {
-    echo "trigger start hwmon service"
     # init hwmon
     iniset -sudo /etc/systemd/system/devstack@hwmon.service "Service" "Type" "forking"
     iniset -sudo /etc/systemd/system/devstack@hwmon.service "Service" "PIDFile" "/var/run/hwmond.pid"
@@ -491,16 +486,13 @@ function start_mtce_control {
     # Oneshot goenabled control
     sudo ${SYSCONFDIR}/init.d/goenabledControl start
 
-    if is_service_enabled mtce; then
-        echo "start mtcAgent"
+    if is_service_enabled mtce-agent || is_service_enabled mtce; then
         start_mtcAgent
     fi
-    if is_service_enabled hbs; then
-        echo "start hbsAgent"
+    if is_service_enabled hbs-agent || is_service_enabled hbs; then
         start_hbsAgent
     fi
-    if is_service_enabled hwmon; then
-        echo "start hwmon"
+    if is_service_enabled hwmon && is_service_enabled sysinv; then
         start_hwmon
     fi
 }
@@ -524,45 +516,45 @@ function start_mtce_storage {
 }
 
 function start_maintenance {
+    if is_service_enabled mtce-control; then
+        start_mtce_control
+    fi
+    if is_service_enabled mtce-compute; then
+        start_mtce_compute
+    fi
+    if is_service_enabled mtce-storage; then
+        start_mtce_storage
+    fi
+
     start_goenabled
 
     if is_service_enabled hbs; then
-        echo "start hbs client service"
         start_hbsClient
     fi
     if is_service_enabled mtce; then
-        echo "start mtce client service"
         start_mtcClient
     fi
     if is_service_enabled rmon; then
-        echo "start rmon service"
         start_rmon
     fi
     if is_service_enabled mtclog; then
-        echo "start mtclog service"
         start_mtclog
     fi
     if is_service_enabled mtcalarm; then
-        echo "start mtcalarm service"
         start_mtcalarm
     fi
     if is_service_enabled fsmon; then
-        echo "start fsmon service"
         start_fsmon
     fi
     if is_service_enabled pmon; then
-        echo "start pmon service"
         start_pmon
     fi
     if is_service_enabled hostw; then
-        echo "start hostw service"
         start_hostw
     fi
 }
 
 function start_mtcClient {
-    echo "trigger start mtce client service"
-
     # copy mtcClient.service template to devstack
     sudo cp ${PREFIX}/lib/systemd/system/mtcClient.service \
         ${SYSCONFDIR}/systemd/system/devstack@mtcClient.service
@@ -570,8 +562,6 @@ function start_mtcClient {
 }
 
 function start_hbsClient {
-    echo "trigger start hbs client service"
-
     # copy hbsClient.service template to devstack
     sudo cp ${PREFIX}/lib/systemd/system/hbsClient.service \
         ${SYSCONFDIR}/systemd/system/devstack@hbsClient.service
@@ -579,8 +569,6 @@ function start_hbsClient {
 }
 
 function start_pmon {
-    echo "trigger start pmon service"
-
     # copy pmon.service template to devstack
     sudo cp ${PREFIX}/lib/systemd/system/pmon.service \
         ${SYSCONFDIR}/systemd/system/devstack@pmon.service
@@ -589,8 +577,6 @@ function start_pmon {
 }
 
 function start_rmon {
-    echo "trigger start rmon service"
-
     # copy rmon.service template to devstack
     sudo cp ${PREFIX}/lib/systemd/system/rmon.service \
         ${SYSCONFDIR}/systemd/system/devstack@rmon.service
@@ -599,8 +585,6 @@ function start_rmon {
 }
 
 function start_mtclog {
-    echo "trigger start mtclog service"
-
     # copy mtclog.service template to devstack
     sudo cp ${PREFIX}/lib/systemd/system/mtclog.service \
         ${SYSCONFDIR}/systemd/system/devstack@mtclog.service
@@ -609,8 +593,6 @@ function start_mtclog {
 }
 
 function start_mtcalarm {
-    echo "trigger start mtcalarm service"
-
     # copy mtcalarm.service template to devstack
     sudo cp ${PREFIX}/lib/systemd/system/mtcalarm.service \
         ${SYSCONFDIR}/systemd/system/devstack@mtcalarm.service
@@ -619,13 +601,10 @@ function start_mtcalarm {
 }
 
 function start_goenabled {
-    echo "trigger start goenabled service"
     sudo ${SYSCONFDIR}/init.d/goenabled start
 }
 
 function start_fsmon {
-    echo "trigger start fsmon service"
-
     # copy fsmon.service template to devstack
     sudo cp ${PREFIX}/lib/systemd/system/fsmon.service \
         ${SYSCONFDIR}/systemd/system/devstack@fsmon.service
@@ -634,8 +613,6 @@ function start_fsmon {
 }
 
 function start_hostw {
-    echo "trigger start hostw service"
-
     # copy hostw.service template to devstack
     sudo cp ${PREFIX}/lib/systemd/system/hostw.service \
         ${SYSCONFDIR}/systemd/system/devstack@hostw.service
@@ -658,16 +635,13 @@ function stop_hwmon {
 function stop_mtce_control {
     sudo ${SYSCONFDIR}/init.d/goenabledControl stop
 
-    if is_service_enabled mtce; then
-        echo "stop mtcAgent"
+    if is_service_enabled mtce-agent || is_service_enabled mtce; then
         stop_mtcAgent
     fi
-    if is_service_enabled hbs; then
-        echo "stop hbsAgent"
+    if is_service_enabled hbs-agent || is_service_enabled hbs; then
         stop_hbsAgent
     fi
-    if is_service_enabled hwmon; then
-        echo "stop hwmon"
+    if is_service_enabled hwmon && is_service_enabled sysinv; then
         stop_hwmon
     fi
 }
@@ -720,42 +694,42 @@ function stop_maintenance {
     stop_goenabled
 
     if is_service_enabled pmon; then
-        echo "stop pmon service"
         stop_pmon
     fi
     if is_service_enabled mtce; then
-        echo "stop mtce client service"
         stop_mtcClient
     fi
     if is_service_enabled hbs; then
-        echo "stop hbs client service"
         stop_hbsClient
     fi
     if is_service_enabled rmon; then
-        echo "stop rmon service"
         stop_rmon
     fi
     if is_service_enabled mtclog; then
-        echo "stop mtclog service"
         stop_mtclog
     fi
     if is_service_enabled mtcalarm; then
-        echo "stop mtcalarm service"
         stop_mtcalarm
     fi
     if is_service_enabled fsmon; then
-        echo "stop fsmon service"
         stop_fsmon
     fi
     if is_service_enabled hostw; then
-        echo "stop hostw service"
         stop_hostw
+    fi
+
+    if is_service_enabled mtce-control; then
+        stop_mtce_control
+    fi
+    if is_service_enabled mtce-compute; then
+        stop_mtce_compute
+    fi
+    if is_service_enabled mtce-storage; then
+        stop_mtce_storage
     fi
 }
 
 function cleanup_metal {
-    echo "cleanup_metal"
-
     # TODO: move it to Makefile uninstall
     # remove mtce
     local x version
@@ -985,6 +959,17 @@ function cleanup_metal {
         # Storage-Only Init Scripts
         sudo rm -rf ${sysconf_dir}/init.d/goenabledStorage
     fi
+}
+
+function uninstall_files() {
+    local dest_dir=$1
+    local dest_file_array=($2)
+    local file=""
+
+    for (( i=0; i<${#dest_file_array[*]}; i++ )); do
+        file=${dest_file_array[$i]##*/}
+        sudo rm -rf $dest_dir/$file
+    done
 }
 
 $_XTRACE_STX_METAL
