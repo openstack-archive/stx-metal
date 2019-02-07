@@ -1,0 +1,9 @@
+Code-Review+2: John Kung <john.kung@windriver.com>
+Code-Review+2: Eric MacDonald <eric.macdonald@windriver.com>
+Workflow+1: Eric MacDonald <eric.macdonald@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Thu, 07 Feb 2019 19:26:14 +0000
+Reviewed-on: https://review.openstack.org/634255
+Project: openstack/stx-metal
+Branch: refs/heads/master
