@@ -1,0 +1,13 @@
+Code-Review+1: Filippo Inzaghi <zhao.daqing@99cloud.net>
+Code-Review+1: Andriy Shevchenko <huang.zhiping@99cloud.net>
+Code-Review+1: Al Bailey <al.bailey@windriver.com>
+Code-Review+2: Tao Liu <tao.liu@windriver.com>
+Code-Review+1: Vieri <15050873171@163.com>
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Workflow+1: Don Penney <don.penney@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 11 Feb 2019 16:17:32 +0000
+Reviewed-on: https://review.openstack.org/608223
+Project: openstack/stx-metal
+Branch: refs/heads/master
