@@ -131,10 +131,10 @@ function install_mtce_common {
         "common/libhostUtil.a" \
         "daemon/libdaemon.a" \
         )
-    sudo install -m 755 -d ${lib64_dir}
-    sudo install -m 644 -t ${lib64_dir} ${libdaecom_file[*]}
+    install -m 755 -d ${lib64_dir}
+    install -m 644 -t ${lib64_dir} ${libdaecom_file[*]}
 
-    sudo install -m 755 -d ${inc_dir}
+    install -m 755 -d ${inc_dir}
     local commonhdr_file=( \
         "common/fitCodes.h" \
         "common/logMacros.h" \
@@ -159,16 +159,16 @@ function install_mtce_common {
         "common/tokenUtil.h" \
         "common/secretUtil.h" \
         )
-    sudo install -m 755 -d ${inc_dir}
-    sudo install -m 644 -t ${inc_dir} ${commonhdr_file[*]}
+    install -m 755 -d ${inc_dir}
+    install -m 644 -t ${inc_dir} ${commonhdr_file[*]}
 
     local daemonhdr_file=( \
         "daemon/daemon_ini.h" \
         "daemon/daemon_common.h" \
         "daemon/daemon_option.h" \
         )
-    sudo install -m 755 -d ${inc_dir}
-    sudo install -m 644 -t ${inc_dir} ${daemonhdr_file[*]}
+    install -m 755 -d ${inc_dir}
+    install -m 644 -t ${inc_dir} ${daemonhdr_file[*]}
     popd
 }
 
@@ -257,8 +257,8 @@ function install_mtce {
 
     build_mtce $major $minor
 
-    local bin_dir=/usr/local/bin
-    local sbin_dir=/usr/local/sbin
+    local bin_dir=${STX_INST_DIR}/bin
+    local sbin_dir=${STX_INST_DIR}/sbin
     local lib_dir=${STX_INST_DIR}/lib
     local lib64_dir=${STX_INST_DIR}/lib64
     local inc_dir=${STX_INST_DIR}/include
@@ -279,23 +279,21 @@ function install_mtce {
 
     # TODO: follow install_files way in install_mtce_common to install files
     # Resource Agent Stuff
-    sudo install -m 755 -d ${lib_dir}/ocf
-    sudo install -m 755 -d ${lib_dir}/ocf/resource.d
-    sudo install -m 755 -d ${lib_dir}/ocf/resource.d/platform
-    sudo install -m 755 -p -D scripts/mtcAgent ${lib_dir}/ocf/resource.d/platform/mtcAgent
-    sudo install -m 755 -p -D hwmon/scripts/ocf/hwmon ${lib_dir}/ocf/resource.d/platform/hwmon
+    install -m 755 -d ${lib_dir}/ocf/resource.d/platform
+    install -m 755 -p -D scripts/mtcAgent ${lib_dir}/ocf/resource.d/platform/mtcAgent
+    install -m 755 -p -D hwmon/scripts/ocf/hwmon ${lib_dir}/ocf/resource.d/platform/hwmon
 
     # TODO: fix this issue in multi-os task
     # The default shell of ubuntu is dash, causes loop syntax error
     if is_ubuntu; then
-        sudo sed -i "s|#!/bin/sh|#!/bin/bash|g" ${STX_INST_DIR}/lib/ocf/resource.d/platform/mtcAgent
-        sudo sed -i "s|#!/bin/sh|#!/bin/bash|g" ${STX_INST_DIR}/lib/ocf/resource.d/platform/hwmon
+        sed -i "s|#!/bin/sh|#!/bin/bash|g" ${STX_INST_DIR}/lib/ocf/resource.d/platform/mtcAgent
+        sed -i "s|#!/bin/sh|#!/bin/bash|g" ${STX_INST_DIR}/lib/ocf/resource.d/platform/hwmon
     fi
 
     # TODO: figure out why OCF_ROOT is not set when running stack.sh
     # workaround to hardcode OCF_ROOT
-    sudo sed -i "s|\${OCF_ROOT}|/usr/lib/ocf|g" ${STX_INST_DIR}/lib/ocf/resource.d/platform/mtcAgent
-    sudo sed -i "s|\${OCF_ROOT}|/usr/lib/ocf|g" ${STX_INST_DIR}/lib/ocf/resource.d/platform/hwmon
+    sed -i "s|\${OCF_ROOT}|/usr/lib/ocf|g" ${STX_INST_DIR}/lib/ocf/resource.d/platform/mtcAgent
+    sed -i "s|\${OCF_ROOT}|/usr/lib/ocf|g" ${STX_INST_DIR}/lib/ocf/resource.d/platform/hwmon
 
     # config files
     sudo install -m 755 -d ${sysconf_dir}/mtc
@@ -313,23 +311,23 @@ function install_mtce {
     sudo install -m 644 -p -D scripts/sensor_quanta_v1_ilo_v4.profile ${sysconf_dir}/bmc/server_profiles.d/sensor_quanta_v1_ilo_v4.profile
 
     # binaries
-    sudo install -m 755 -p -D maintenance/mtcAgent ${bin_dir}/mtcAgent
-    sudo install -m 755 -p -D maintenance/mtcClient ${bin_dir}/mtcClient
-    sudo install -m 755 -p -D heartbeat/hbsAgent ${bin_dir}/hbsAgent
-    sudo install -m 755 -p -D heartbeat/hbsClient ${bin_dir}/hbsClient
-    sudo install -m 755 -p -D pmon/pmond ${bin_dir}/pmond
-    sudo install -m 755 -p -D hostw/hostwd ${bin_dir}/hostwd
-    sudo install -m 755 -p -D rmon/rmond ${bin_dir}/rmond
-    sudo install -m 755 -p -D fsmon/fsmond ${bin_dir}/fsmond
-    sudo install -m 755 -p -D hwmon/hwmond ${bin_dir}/hwmond
-    sudo install -m 755 -p -D mtclog/mtclogd ${bin_dir}/mtclogd
-    sudo install -m 755 -p -D alarm/mtcalarmd ${bin_dir}/mtcalarmd
-    sudo install -m 755 -p -D rmon/rmon_resource_notify/rmon_resource_notify ${bin_dir}/rmon_resource_notify
-    sudo install -m 755 -p -D scripts/wipedisk ${bin_dir}/wipedisk
-    sudo install -m 755 -p -D fsync/fsync ${STX_INST_DIR}/sbin/fsync
-    sudo install -m 700 -p -D pmon/scripts/pmon-restart ${sbin_dir}/pmon-restart
-    sudo install -m 700 -p -D pmon/scripts/pmon-start ${sbin_dir}/pmon-start
-    sudo install -m 700 -p -D pmon/scripts/pmon-stop ${sbin_dir}/pmon-stop
+    install -m 755 -p -D maintenance/mtcAgent ${bin_dir}/mtcAgent
+    install -m 755 -p -D maintenance/mtcClient ${bin_dir}/mtcClient
+    install -m 755 -p -D heartbeat/hbsAgent ${bin_dir}/hbsAgent
+    install -m 755 -p -D heartbeat/hbsClient ${bin_dir}/hbsClient
+    install -m 755 -p -D pmon/pmond ${bin_dir}/pmond
+    install -m 755 -p -D hostw/hostwd ${bin_dir}/hostwd
+    install -m 755 -p -D rmon/rmond ${bin_dir}/rmond
+    install -m 755 -p -D fsmon/fsmond ${bin_dir}/fsmond
+    install -m 755 -p -D hwmon/hwmond ${bin_dir}/hwmond
+    install -m 755 -p -D mtclog/mtclogd ${bin_dir}/mtclogd
+    install -m 755 -p -D alarm/mtcalarmd ${bin_dir}/mtcalarmd
+    install -m 755 -p -D rmon/rmon_resource_notify/rmon_resource_notify ${bin_dir}/rmon_resource_notify
+    install -m 755 -p -D scripts/wipedisk ${bin_dir}/wipedisk
+    install -m 755 -p -D fsync/fsync ${STX_INST_DIR}/sbin/fsync
+    install -m 700 -p -D pmon/scripts/pmon-restart ${sbin_dir}/pmon-restart
+    install -m 700 -p -D pmon/scripts/pmon-start ${sbin_dir}/pmon-start
+    install -m 700 -p -D pmon/scripts/pmon-stop ${sbin_dir}/pmon-stop
 
     # init script files
     sudo install -m 755 -p -D scripts/mtcClient ${sysconf_dir}/init.d/mtcClient
@@ -374,7 +372,7 @@ function install_mtce {
     sudo install -m 755 -p -D scripts/runservices ${sysconf_dir}/init.d/runservices
 
     # test tools
-    sudo install -m 755 -p -D scripts/dmemchk.sh ${sbin_dir}
+    install -m 755 -p -D scripts/dmemchk.sh ${sbin_dir}
 
     # process monitor config files
     sudo install -m 755 -d ${local_etc_pmond}
@@ -414,17 +412,17 @@ function install_mtce {
     sudo install -m 644 -p -D alarm/scripts/mtcalarm.logrotate ${local_etc_logrotated}/mtcalarm.logrotate
 
     # software development files
-    sudo install -m 644 -p -D heartbeat/mtceHbsCluster.h ${inc_dir}/mtceHbsCluster.h
-    sudo install -m 755 -p -D public/libamon.so.${major} ${lib64_dir}/libamon.so.${major}
-    sudo install -m 755 -p -D rmon/rmonApi/librmonapi.so.${major} ${lib64_dir}/librmonapi.so.${major}
+    install -m 644 -p -D heartbeat/mtceHbsCluster.h ${inc_dir}/mtceHbsCluster.h
+    install -m 755 -p -D public/libamon.so.${major} ${lib64_dir}/libamon.so.${major}
+    install -m 755 -p -D rmon/rmonApi/librmonapi.so.${major} ${lib64_dir}/librmonapi.so.${major}
     popd
 
     pushd ${lib64_dir}
-    sudo ln -sf libamon.so.${major} libamon.so.${major}.${minor}
-    sudo ln -sf libamon.so.${major} libamon.so
+    ln -sf libamon.so.${major} libamon.so.${major}.${minor}
+    ln -sf libamon.so.${major} libamon.so
 
-    sudo ln -sf librmonapi.so.${major} librmonapi.so.${major}.${minor}
-    sudo ln -sf librmonapi.so.${major} librmonapi.so
+    ln -sf librmonapi.so.${major} librmonapi.so.${major}.${minor}
+    ln -sf librmonapi.so.${major} librmonapi.so
     popd
 }
 
@@ -474,11 +472,13 @@ function configure_maintenance {
     iniset -sudo /etc/mtc.ini "agent" "sm_client_port" "2224"
 
     # add port 5000 to keystone apache server
-    sudo sed -i '$aListen 5000' /etc/apache2/sites-available/keystone-wsgi-public.conf
-    sudo sed -i '$a<VirtualHost *:5000>' /etc/apache2/sites-available/keystone-wsgi-public.conf
-    sudo sed -i '$aProxyPass / "unix:/var/run/uwsgi/keystone-wsgi-public.socket|uwsgi://uwsgi-uds-keystone-wsgi-public/" retry=0"' /etc/apache2/sites-available/keystone-wsgi-public.conf
-    sudo sed -i '$a</VirtualHost>' /etc/apache2/sites-available/keystone-wsgi-public.conf
-    sudo systemctl restart apache2
+    # write_uwsgi_config "$KEYSTONE_PUBLIC_UWSGI_CONF" "$KEYSTONE_PUBLIC_UWSGI" "/identity"
+
+    # sudo sed -i '$aListen 5000' /etc/apache2/sites-available/keystone-wsgi-public.conf
+    # sudo sed -i '$a<VirtualHost *:5000>' /etc/apache2/sites-available/keystone-wsgi-public.conf
+    # sudo sed -i '$aProxyPass / "unix:/var/run/uwsgi/keystone-wsgi-public.socket|uwsgi://uwsgi-uds-keystone-wsgi-public/" retry=0"' /etc/apache2/sites-available/keystone-wsgi-public.conf
+    # sudo sed -i '$a</VirtualHost>' /etc/apache2/sites-available/keystone-wsgi-public.conf
+    # sudo systemctl restart apache2
 
     if is_ubuntu; then
         sudo ln -sf /lib/lsb/init-functions /etc/init.d/functions
