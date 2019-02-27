@@ -474,11 +474,13 @@ function configure_maintenance {
     iniset -sudo /etc/mtc.ini "agent" "sm_client_port" "2224"
 
     # add port 5000 to keystone apache server
-    sudo sed -i '$aListen 5000' /etc/apache2/sites-available/keystone-wsgi-public.conf
-    sudo sed -i '$a<VirtualHost *:5000>' /etc/apache2/sites-available/keystone-wsgi-public.conf
-    sudo sed -i '$aProxyPass / "unix:/var/run/uwsgi/keystone-wsgi-public.socket|uwsgi://uwsgi-uds-keystone-wsgi-public/" retry=0"' /etc/apache2/sites-available/keystone-wsgi-public.conf
-    sudo sed -i '$a</VirtualHost>' /etc/apache2/sites-available/keystone-wsgi-public.conf
-    sudo systemctl restart apache2
+    # write_uwsgi_config "$KEYSTONE_PUBLIC_UWSGI_CONF" "$KEYSTONE_PUBLIC_UWSGI" "/identity"
+
+    # sudo sed -i '$aListen 5000' /etc/apache2/sites-available/keystone-wsgi-public.conf
+    # sudo sed -i '$a<VirtualHost *:5000>' /etc/apache2/sites-available/keystone-wsgi-public.conf
+    # sudo sed -i '$aProxyPass / "unix:/var/run/uwsgi/keystone-wsgi-public.socket|uwsgi://uwsgi-uds-keystone-wsgi-public/" retry=0"' /etc/apache2/sites-available/keystone-wsgi-public.conf
+    # sudo sed -i '$a</VirtualHost>' /etc/apache2/sites-available/keystone-wsgi-public.conf
+    # sudo systemctl restart apache2
 
     if is_ubuntu; then
         sudo ln -sf /lib/lsb/init-functions /etc/init.d/functions
