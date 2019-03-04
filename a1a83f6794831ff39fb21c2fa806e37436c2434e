@@ -1,0 +1,10 @@
+Code-Review+2: Don Penney <don.penney@windriver.com>
+Code-Review+1: Bob Church <robert.church@windriver.com>
+Code-Review+2: Eric MacDonald <eric.macdonald@windriver.com>
+Workflow+1: Eric MacDonald <eric.macdonald@windriver.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 04 Mar 2019 18:29:54 +0000
+Reviewed-on: https://review.openstack.org/640532
+Project: openstack/stx-metal
+Branch: refs/heads/f/keystone-db
