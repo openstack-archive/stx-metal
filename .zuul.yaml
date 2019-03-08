@@ -41,6 +41,7 @@
         mtce-compute: true
         mtce-control: true
         mtce-storage: true
+        mtce-inventory: true
         fsmon: true
         hbs: true
         hwmon: true
