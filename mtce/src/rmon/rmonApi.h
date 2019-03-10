@@ -40,11 +40,6 @@ int rmonApi_init ( string ip, int port );
 void rmonApi_fini ( void );
 
 
-/**remote logging service request handlers */
-
-void rmonHdlr_remotelogging_handler ( struct evhttp_request *req, void *arg );
-int rmonHdlr_remotelogging_query (resource_config_type * ptr);
-
 /**ceilometer sample create request handlers */
 void rmonHdlr_ceilometer_handler ( struct evhttp_request *req, void *arg );
 #endif 

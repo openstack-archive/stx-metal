@@ -450,7 +450,6 @@ install -m 644 -p -D %{_buildsubdir}/lmon/scripts/lmon.pmon.conf %{buildroot}%{l
 install -m 755 -d %{buildroot}%{local_etc_rmond}
 install -m 755 -d %{buildroot}%{_sysconfdir}/rmonapi.d
 install -m 755 -d %{buildroot}%{_sysconfdir}/rmonfiles.d
-install -m 644 -p -D %{_buildsubdir}/rmon/scripts/remotelogging_resource.conf %{buildroot}%{local_etc_rmond}/remotelogging_resource.conf
 install -m 644 -p -D %{_buildsubdir}/rmon/scripts/cinder_virtual_resource.conf %{buildroot}%{local_etc_rmond}/cinder_virtual_resource.conf
 install -m 644 -p -D %{_buildsubdir}/rmon/scripts/nova_virtual_resource.conf %{buildroot}%{local_etc_rmond}/nova_virtual_resource.conf
 install -m 755 -p -D %{_buildsubdir}/rmon/scripts/rmon_reload_on_cpe.sh %{buildroot}%{local_etc_goenabledd}/rmon_reload_on_cpe.sh
@@ -617,7 +616,6 @@ install -m 755 -d %{buildroot}/var/run
 %{local_etc_logrotated}/rmon.logrotate
 %{_unitdir}/rmon.service
 
-%{local_etc_rmond}/remotelogging_resource.conf
 %{local_etc_rmond}/cinder_virtual_resource.conf
 %{local_etc_rmond}/nova_virtual_resource.conf
 

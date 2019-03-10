@@ -4316,10 +4316,6 @@ void _get_events (void)
             /* vswitch memory with specific sockets */
             /* skip these ones as they are already taken care of above */
         }
-        else if(strcmp(resource, REMOTE_LOGGING_RESOURCE_NAME) == 0)
-        {
-            rmonHdlr_remotelogging_query(&resource_config[i]);
-        }
         else if (strcmp(resource, INSTANCE_RESOURCE_NAME) == 0)
         {
             /* do not perform this check if we are not on a compute node.
