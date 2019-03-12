@@ -4718,13 +4718,6 @@ void rmon_service (rmon_ctrl_type * ctrl_ptr)
                             break;
                         }
 
-                        snprintf(alarm_to_search, FM_MAX_BUFFER_LENGTH,  "%s.filesystem=%s", _rmon_ctrl_ptr->my_hostname, resource_config[j].resource);
-                        if (strncmp(alarm_to_search, (active_alarms+i)->entity_instance_id, sizeof(alarm_to_search)) == 0)
-                        {
-                            found = true;
-                            break;
-                        }
-
                         // We found the resource but lets check if the alarm is enable for it, if it's not
                         // we want to clear that alarm
                         if (found)
