@@ -48,8 +48,8 @@ STX_SUDO="sudo"
 [[ -w $STX_INST_DIR ]] && STX_SUDO="env"
 
 SYSCONFDIR=/etc
-OAM_ETH_NAME=ens3
-MGMT_ETH_NAME=lo
+OAM_ETH_NAME=$(ip -f inet route | awk '/default/ {print $5}' | head -1)
+MGMT_ETH_NAME=$(ip -f inet route | awk '/default/ {print $5}' | head -1)
 SW_VERSION=18.10
 
 OCF_ROOT=/usr/lib/ocf
@@ -94,7 +94,7 @@ function build_mtce_common {
     popd
 }
 
-function install_maintenance {
+function install_metal {
     install_mtce_common
     # components could be seperately installed if
     # installation is well controlled in Makefile
@@ -432,7 +432,7 @@ function install_mtce {
     popd
 }
 
-function configure_maintenance {
+function configure_metal {
     echo "${STX_INST_DIR}/lib64" | sudo tee /etc/ld.so.conf.d/stx-metal.conf
     sudo ldconfig
 
@@ -455,23 +455,23 @@ function configure_maintenance {
     # TODO: enable controllerconfig to do this
     # add floating ip hostname in hosts
     if ! grep -q 'controller$' /etc/hosts; then
-        echo "192.168.204.2 controller" | sudo tee -a /etc/hosts
+        echo "$HOST_IP controller" | sudo tee -a /etc/hosts
     fi
     # add controller-0
     if ! grep -q 'controller-0$' /etc/hosts; then
-        echo "192.168.204.3 controller-0" | sudo tee -a /etc/hosts
+        echo "$HOST_IP controller-0" | sudo tee -a /etc/hosts
     fi
 
     # puppet configuration for mtce
     iniset -sudo /etc/mtc.ini "agent" "keystone_auth_username" "admin"
-    iniset -sudo /etc/mtc.ini "agent" "keystone_auth_pw" "secret"
+    iniset -sudo /etc/mtc.ini "agent" "keystone_auth_pw" "$SERVICE_PASSWORD"
     iniset -sudo /etc/mtc.ini "agent" "keystone_auth_project" "admin"
-    iniset -sudo /etc/mtc.ini "agent" "keystone_user_domain" "Default"
-    iniset -sudo /etc/mtc.ini "agent" "keystone_project_domain" "Default"
+    iniset -sudo /etc/mtc.ini "agent" "keystone_user_domain" "$SERVICE_DOMAIN_NAME"
+    iniset -sudo /etc/mtc.ini "agent" "keystone_project_domain" "$SERVICE_DOMAIN_NAME"
     iniset -sudo /etc/mtc.ini "agent" "keystone_auth_host" "127.0.0.1"
-    iniset -sudo /etc/mtc.ini "agent" "keystone_auth_uri" "http://127.0.0.1:5000"
+    iniset -sudo /etc/mtc.ini "agent" "keystone_auth_uri" "$KEYSTONE_SERVICE_URI"
     iniset -sudo /etc/mtc.ini "agent" "keystone_auth_port" "5000"
-    iniset -sudo /etc/mtc.ini "agent" "keystone_region_name" "RegionOne"
+    iniset -sudo /etc/mtc.ini "agent" "keystone_region_name" "$REGION_NAME"
     iniset -sudo /etc/mtc.ini "agent" "keyring_directory" "/opt/platform/.keyring/${SW_VERSION}"
     # sm port add to config file
     iniset -sudo /etc/mtc.ini "agent" "sm_server_port" "2124"
@@ -487,6 +487,39 @@ function configure_maintenance {
 
     if is_ubuntu; then
         sudo ln -sf /lib/lsb/init-functions /etc/init.d/functions
+    fi
+
+    if is_service_enabled mtcAgent; then
+        # configure barbican
+        if [ ! -f "/etc/barbican/barbican.conf" ]; then
+            sudo mkdir -p /etc/barbican
+            sudo touch /etc/barbican/barbican.conf
+        fi
+        iniset -sudo /etc/barbican/barbican.conf "DEFAULT" "host_href" "http://controller:9311"
+        iniset -sudo /etc/barbican/barbican.conf "DEFAULT" "sql_connection" "postgresql://admin-barbican:$DATABASE_PASSWORD@$HOST_IP/barbican"
+        iniset -sudo /etc/barbican/barbican.conf "DEFAULT" "sql_idle_timeout" "60"
+        iniset -sudo /etc/barbican/barbican.conf "DEFAULT" "use_syslog" "True"
+        iniset -sudo /etc/barbican/barbican.conf "DEFAULT" "syslog_log_facility" "local2"
+        iniset -sudo /etc/barbican/barbican.conf "DEFAULT" "transport_url" "rabbit://$RABBIT_USERID:$RABBIT_PASSWORD@$RABBIT_HOST:5672"
+        iniset -sudo /etc/barbican/barbican.conf "DEFAULT" "bind_port" "9311"
+        iniset -sudo /etc/barbican/barbican.conf "DEFAULT" "bind_host" "$HOST_IP"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_authtoken" "auth_uri" "$KEYSTONE_SERVICE_URI"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_authtoken" "region_name" "RegionOne"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_authtoken" "auth_type" "password"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_authtoken" "password" "$SERVICE_PASSWORD"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_authtoken" "username" "barbican"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_authtoken" "project_name" "services"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_authtoken" "auth_url" "$KEYSTONE_SERVICE_URI"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_authtoken" "project_domain_name" "$SERVICE_DOMAIN_NAME"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_authtoken" "user_domain_name" "$SERVICE_DOMAIN_NAME"
+        iniset -sudo /etc/barbican/barbican.conf "keystone_notifications" "enable" "True"
+        iniset -sudo /etc/barbican/barbican.conf "oslo_messaging_rabbit" "ssl" "False"
+        iniset -sudo /etc/barbican/barbican.conf "oslo_middleware" "enable_proxy_headers_parsing" "True"
+        iniset -sudo /etc/barbican/barbican.conf "oslo_policy" "policy_file" "/etc/barbican/policy.json"
+        iniset -sudo /etc/barbican/barbican.conf "service_credentials" "interface" "internalURL"
+        iniset -sudo /etc/barbican/barbican.conf "database" "max_pool_size" "1"
+        iniset -sudo /etc/barbican/barbican.conf "database" "idle_timeout" "60"
+        iniset -sudo /etc/barbican/barbican.conf "database" "connection" "postgresql+psycopg2://admin-barbican:$DATABASE_PASSWORD@$HOST_IP/barbican"
     fi
 }
 
@@ -516,6 +549,7 @@ function start_hwmon {
     # init hwmon
     iniset -sudo /etc/systemd/system/devstack@hwmon.service "Service" "Type" "forking"
     iniset -sudo /etc/systemd/system/devstack@hwmon.service "Service" "PIDFile" "/var/run/hwmond.pid"
+    iniset -sudo /etc/systemd/system/devstack@hwmon.service "Service" "Environment" "OCF_ROOT=${OCF_ROOT}"
 
     run_process hwmon "${OCF_ROOT}/resource.d/platform/hwmon start" root root
 }
@@ -524,10 +558,10 @@ function start_mtce_control {
     # Oneshot goenabled control
     sudo ${SYSCONFDIR}/init.d/goenabledControl start
 
-    if is_service_enabled mtce-agent || is_service_enabled mtce; then
+    if is_service_enabled mtcAgent; then
         start_mtcAgent
     fi
-    if is_service_enabled hbs-agent || is_service_enabled hbs; then
+    if is_service_enabled hbsAgent; then
         start_hbsAgent
     fi
     if is_service_enabled hwmon && is_service_enabled sysinv; then
@@ -553,7 +587,7 @@ function start_mtce_storage {
     sudo ${SYSCONFDIR}/init.d/goenabledStorage start
 }
 
-function start_maintenance {
+function start_metal {
     if is_service_enabled mtce-control; then
         start_mtce_control
     fi
@@ -566,10 +600,10 @@ function start_maintenance {
 
     start_goenabled
 
-    if is_service_enabled hbs; then
+    if is_service_enabled hbsClient; then
         start_hbsClient
     fi
-    if is_service_enabled mtce; then
+    if is_service_enabled mtcClient; then
         start_mtcClient
     fi
     if is_service_enabled rmon; then
@@ -643,10 +677,10 @@ function stop_hwmon {
 function stop_mtce_control {
     sudo ${SYSCONFDIR}/init.d/goenabledControl stop
 
-    if is_service_enabled mtce-agent || is_service_enabled mtce; then
+    if is_service_enabled mtcAgent; then
         stop_mtcAgent
     fi
-    if is_service_enabled hbs-agent || is_service_enabled hbs; then
+    if is_service_enabled hbsAgent; then
         stop_hbsAgent
     fi
     if is_service_enabled hwmon && is_service_enabled sysinv; then
@@ -698,7 +732,7 @@ function stop_hostw {
     stop_process hostw
 }
 
-function stop_maintenance {
+function stop_metal {
     stop_goenabled
 
     if is_service_enabled pmon; then
