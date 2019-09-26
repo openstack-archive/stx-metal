@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<build>
-    <version>xxxSW_VERSIONxxx</version>
-    <supported_upgrades>
-        <upgrade>
-            <version>18.03</version>
-        </upgrade>
-    </supported_upgrades>
-</build>
